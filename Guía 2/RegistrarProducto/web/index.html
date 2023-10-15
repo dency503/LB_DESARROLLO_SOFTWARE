@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>REGISTRO PRODUCTO</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Registro de  Producto</h1>
+        <form action="ServletPrincipal" method="post">
+            <div class="form-group">
+                <label for="nombreProducto">Nombre del producto:</label>
+                <input type="text" class="form-control" id="nombreProducto" name="nombreProducto" required>
+            </div>
+            <div class="form-group">
+                <label for="precio">Precio:</label>
+                <input type="number" class="form-control" id="precio" name="precio" step="0.01" min="1" placeholder="Precio mínimo 1" required>
+            </div>
+            <div class="form-group">
+                <label for="cantidad">Cantidad:</label>
+                <input type="number" class="form-control" id="cantidad" name="cantidad" min="1" placeholder="Cantidad mínima 1" required>
+            </div>
+            <div class="form-group">
+                <label for="fecha">Fecha de entrada:</label>
+                <input type="date" class="form-control" id="fecha" name="fecha" min="2022-01-01" max="2023-12-31" required>
+            </div>
+            <div class="form-group">
+                <label for="descripcion">Descripción:</label>
+                <textarea class="form-control" id="descripcion" name="descripcion" rows="4" required></textarea>
+            </div>
+            <div class="form-group">
+                <label>Categoria:</label><br>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="categoria" id="categoriaElectronica" value="electronica" checked>
+                    <label class="form-check-label" for="categoriaElectronica">Fontaneria</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="categoria" id="categoriaRopa" value="ropa">
+                    <label class="form-check-label" for="categoriaRopa">Hogar</label>
+                </div>
+                <!-- Agrega más categorías aquí según sea necesario -->
+            </div>
+            <button type="submit" class="btn btn-primary" name="botonenviar">ENVIAR</button>
+            <button type="reset" class="btn btn-secondary" name="botonlimpiar">LIMPIAR</button>
+        </form>
+    </div>
+
+   
+<script src="https://cdn.jsdelivr.net/npm/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
