@@ -4,6 +4,8 @@
  */
 package Servlets;
 
+import Models.EmpleadoModel;
+import Operaciones.Conexion;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +13,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class ServletPrincipal extends HttpServlet {
 
@@ -31,7 +38,32 @@ public class ServletPrincipal extends HttpServlet {
             out.println("</html>");
         }
     }
+ private ArrayList<EmpleadoModel> mostrarEmpleados(HttpServletRequest request, HttpServletResponse response)  {
+        ArrayList<EmpleadoModel> listaEmpleados = new ArrayList<>();
+        try (Connection connection = Conexion.obtenerConexion();
+             PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Empleados");
+             ResultSet rs = pstmt.executeQuery()) {
 
+            while (rs.next()) {
+                EmpleadoModel empleado = new EmpleadoModel();
+                empleado.setIdEmpleado(rs.getInt("idEmpleado"));
+                empleado.setDui(rs.getString("DUI"));
+                empleado.setIsss(rs.getInt("ISSS"));
+                empleado.setNombres(rs.getString("Nombres"));
+                empleado.setApellidos(rs.getString("Apellidos"));
+                empleado.setFechaNacEmpleado(rs.getDate("FechaNacEmpleado"));
+                empleado.setTelefono(rs.getString("Telefono"));
+                empleado.setCorreo(rs.getString("Correo"));
+                empleado.setIdCargo(rs.getInt("ID_Cargo"));
+                empleado.setIdDireccion(rs.getInt("ID_Direccion"));
+                listaEmpleados.add(empleado);
+            }
+        }catch (SQLException e) {
+        // Manejar la excepción SQLException aquí, por ejemplo, registrar el error o lanzar una excepción personalizada.
+        e.printStackTrace(); // Este es solo un ejemplo. En un entorno de producción, deberías manejar la excepción de forma adecuada.
+    }
+        return listaEmpleados;
+    }
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
@@ -45,24 +77,27 @@ public class ServletPrincipal extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-         String accion =  request.getParameter("accion");
-        if(accion == null){
-            request.getRequestDispatcher("/Login.jsp").forward(request, response);                        
-        }else if(accion.equals("Login")){
-            request.getRequestDispatcher("/Login.jsp").forward(request, response);                        
-        }else if(accion.equals("RegistroProductos")){
-            request.getRequestDispatcher("/RegistroProductos.html").forward(request, response);
-        }else if(accion.equals("RegistroEmpleados")){
-            request.getRequestDispatcher("/EmpleadoServlet?action=list").forward(request, response);
-        }else if(accion.equals("RegistroProveedores")){
-            request.getRequestDispatcher("/RegistroProveedores.html").forward(request, response);
-        }else if(accion.equals("RegistroClientes")){
-            request.getRequestDispatcher("/RegistroClientes.html").forward(request, response);
-        }else if(accion.equals("RegistroVentas")){
-            request.getRequestDispatcher("/RegistroVentas.html").forward(request, response);
-        }else if(accion.equals("RegistroCompras")){
-            request.getRequestDispatcher("/RegistroCompras.html").forward(request, response);
-        } 
+        String accion = request.getParameter("accion");
+        if(accion==null){
+            request.getRequestDispatcher("/Login.jsp").forward(request, response);
+         }else if(accion.equals("Login")){
+            request.getRequestDispatcher("/Login.jsp").forward(request, response);
+        }else if(accion.equals("RegistrarEmpleados")){
+            request.getRequestDispatcher("/RegistrarEmpleados.html").forward(request, response);
+        }else if(accion.equals("RegistrarCategorias")){
+            request.getRequestDispatcher("/RegistrarCategorias.html").forward(request, response);
+        }else if(accion.equals("RegistrarCompras")){
+            request.getRequestDispatcher("/RegistrarCompras.html").forward(request, response);
+        }else if(accion.equals("RegistrarVentas")){
+            request.getRequestDispatcher("/RegistrarVentas.html").forward(request, response);
+        }else if(accion.equals("RegistrarClientes")){
+            request.getRequestDispatcher("/RegistrarClientes.html").forward(request, response);
+        }else if(accion.equals("RegistrarProveedores")){
+            request.getRequestDispatcher("/RegistrarProveedores.html").forward(request, response);
+        }else if(accion.equals("GestionarEmpleados")){
+            mostrarEmpleados(request, response);
+            request.getRequestDispatcher("/GestionarEmpleados.jsp").forward(request, response);
+        }
     }
 
    

@@ -45,24 +45,24 @@ public class ServletPrincipal extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-         String accion =  request.getParameter("accion");
-        if(accion == null){
-            request.getRequestDispatcher("/Login.jsp").forward(request, response);                        
-        }else if(accion.equals("Login")){
-            request.getRequestDispatcher("/Login.jsp").forward(request, response);                        
-        }else if(accion.equals("RegistroProductos")){
-            request.getRequestDispatcher("/RegistroProductos.html").forward(request, response);
-        }else if(accion.equals("RegistroEmpleados")){
-            request.getRequestDispatcher("/EmpleadoServlet?action=list").forward(request, response);
-        }else if(accion.equals("RegistroProveedores")){
-            request.getRequestDispatcher("/RegistroProveedores.html").forward(request, response);
-        }else if(accion.equals("RegistroClientes")){
-            request.getRequestDispatcher("/RegistroClientes.html").forward(request, response);
-        }else if(accion.equals("RegistroVentas")){
-            request.getRequestDispatcher("/RegistroVentas.html").forward(request, response);
-        }else if(accion.equals("RegistroCompras")){
-            request.getRequestDispatcher("/RegistroCompras.html").forward(request, response);
-        } 
+        String accion = request.getParameter("accion");
+        if(accion==null){
+            request.getRequestDispatcher("/Login.jsp").forward(request, response);
+         }else if(accion.equals("Login")){
+            request.getRequestDispatcher("/Login.jsp").forward(request, response);
+        }else if(accion.equals("RegistrarEmpleados")){
+            request.getRequestDispatcher("/RegistrarEmpleados.html").forward(request, response);
+        }else if(accion.equals("RegistrarCategorias")){
+            request.getRequestDispatcher("/RegistrarCategorias.html").forward(request, response);
+        }else if(accion.equals("RegistrarCompras")){
+            request.getRequestDispatcher("/RegistrarCompras.html").forward(request, response);
+        }else if(accion.equals("RegistrarVentas")){
+            request.getRequestDispatcher("/RegistrarVentas.html").forward(request, response);
+        }else if(accion.equals("RegistrarClientes")){
+            request.getRequestDispatcher("/RegistrarClientes.html").forward(request, response);
+        }else if(accion.equals("RegistrarProveedores")){
+            request.getRequestDispatcher("/RegistrarProveedores.html").forward(request, response);
+        }
     }
 
    
