@@ -4,28 +4,17 @@
  */
 package Servlets;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 
-/**
- *
- * @author verri
- */
+
 public class ServletPrincipal extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
@@ -55,34 +44,28 @@ public class ServletPrincipal extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-         String accion =  request.getParameter("accion");
-        if(accion == null){
-            request.getRequestDispatcher("/index.html").forward(request, response);                        
-        }else if(accion.equals("Login")){
-            request.getRequestDispatcher("/Login.html").forward(request, response);                        
-        }else if(accion.equals("RegistroProductos")){
-            request.getRequestDispatcher("/RegistroProductos.html").forward(request, response);
-        }else if(accion.equals("RegistroEmpleados")){
-            request.getRequestDispatcher("/RegistroEmpleados.html").forward(request, response);
-        }else if(accion.equals("RegistroProveedores")){
-            request.getRequestDispatcher("/RegistroProveedores.html").forward(request, response);
-        }else if(accion.equals("RegistroClientes")){
-            request.getRequestDispatcher("/RegistroClientes.html").forward(request, response);
-        }else if(accion.equals("RegistroVentas")){
-            request.getRequestDispatcher("/RegistroVentas.html").forward(request, response);
-        }else if(accion.equals("RegistroCompras")){
-            request.getRequestDispatcher("/RegistroCompras.html").forward(request, response);
-        } 
+        
+        String accion = request.getParameter("accion");
+        if(accion==null){
+            request.getRequestDispatcher("/Login.jsp").forward(request, response);
+         }else if(accion.equals("Login")){
+            request.getRequestDispatcher("/Login.jsp").forward(request, response);
+        }else if(accion.equals("RegistrarEmpleados")){
+            request.getRequestDispatcher("/RegistrarEmpleados.html").forward(request, response);
+        }else if(accion.equals("RegistrarCategorias")){
+            request.getRequestDispatcher("/RegistrarCategorias.html").forward(request, response);
+        }else if(accion.equals("RegistrarCompras")){
+            request.getRequestDispatcher("/RegistrarCompras.html").forward(request, response);
+        }else if(accion.equals("RegistrarVentas")){
+            request.getRequestDispatcher("/RegistrarVentas.html").forward(request, response);
+        }else if(accion.equals("RegistrarClientes")){
+            request.getRequestDispatcher("/RegistrarClientes.html").forward(request, response);
+        }else if(accion.equals("RegistrarProveedores")){
+            request.getRequestDispatcher("/RegistrarProveedores.html").forward(request, response);
+        }
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
+   
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -94,15 +77,8 @@ public class ServletPrincipal extends HttpServlet {
 
             try (PrintWriter print = response.getWriter()) {
                 if (usuario.equals("admin") && contrasenia.equals("root")) {
-                    print.println("<!DOCTYPE html>");
-                    print.println("<html>");
-                    print.println("<head>");
-                    print.println("<title>Login Sistema Ferreteria</title>");
-                    print.println("</head>");
-                    print.println("<body>");
-                    print.println("<h1>Bienvenido al Sistema de la Ferreteria</h1>");
-                    print.println("</body>");
-                    print.println("</html>");
+                    
+                    request.getRequestDispatcher("/PanelAdministrador.jsp").forward(request, response);
                 } else {
                     print.println("<!DOCTYPE html>");
                     print.println("<html>");
