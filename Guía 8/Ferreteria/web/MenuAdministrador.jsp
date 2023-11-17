@@ -6,21 +6,19 @@
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
                 <div class="container-fluid">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/Ferreteria">Inicio del sistema</a>
-                        </li>
+                       
                   
                         <li class="nav-item">
-                            <a class="nav-link" href="/Ferreteria?accion=GestionarEmpleados">Registro de Empleados</a>
+                            <a class="nav-link" href="/Ferreteria?accion=GestionarEmpleados">Gestionar de Empleados</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/Ferreteria?accion=GestionarCategorias">Registro de Categorias</a>
+                            <a class="nav-link" href="/Ferreteria?accion=GestionarCategorias">Gestionar de Categorias</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/Ferreteria?accion=RegistrarProductos">Registro de Productos</a>
+                            <a class="nav-link" href="/Ferreteria?accion=GestionarProductos">Gestionar de Productos</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/Ferreteria?accion=RegistarCompras">Registro de Compras</a>
+                            <a class="nav-link" href="/Ferreteria?accion=GestionarCompras">Gestionar de Compras</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/Ferreteria?accion=RegistrarVentas">Registro de Ventas</a>

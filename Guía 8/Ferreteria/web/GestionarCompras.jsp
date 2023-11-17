@@ -1,0 +1,145 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Gestionar Compras | Ferreteria</title>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 50px;
+        }
+
+        h1 {
+            color: #343a40;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        .btn-primary,
+        .btn-danger {
+            margin-right: 5px;
+        }
+
+        .btn {
+            font-size: 14px;
+        }
+
+        .btn i {
+            margin-right: 5px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .btn-danger:hover,
+        .btn-danger:focus {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+
+        .btn-primary i,
+        .btn-danger i {
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">Gestionar Compras</h1>
+        
+        <a href="/Ferreteria?accion=AgregarCompra" class="btn btn-primary mb-3">
+            <i class="fas fa-plus"></i> Agregar Compra
+        </a>
+
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID Compra</th>
+                    <th>ID Proveedor</th>
+                    <th>ID Empleado</th>
+                    <th>Fecha Compra</th>
+                    <th>Monto Compra</th>
+                    <th>Fecha Creación</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <c:forEach var="compra" items="${comprasList}">
+                    <tr>
+                        <td><c:out value="${compra.idCompra}" /></td>
+                        <td><c:out value="${compra.nombreProveedor}" /></td>
+                        <td><c:out value="${compra.nombreEmpleado}" /></td>
+                        <td><c:out value="${compra.fechaCompra}" /></td>
+                        <td><c:out value="${compra.montoCompra}" /></td>
+                        <td><c:out value="${compra.fechaCreacion}" /></td>
+                        <td>
+                            <form method="post" action="/Ferreteria?accion=ModificarCompra">
+                                <input type="hidden" name="idCompra" value="${compra.idCompra}" />
+                                <!-- Add any other purchase-related data -->
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-pencil-alt"></i> Modificar
+                                </button>
+                            </form>
+
+                            <form method="post" action="/Ferreteria?accion=EliminarCompra">
+                                <input type="hidden" name="idCompra" value="${compra.idCompra}" />
+                                <!-- Add any other purchase-related data -->
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash-alt"></i> Eliminar
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                </c:forEach>
+            </tbody>
+        </table>
+
+        <!-- Add purchase management actions, links, or forms here -->
+
+        <button class="btn btn-primary" onclick="regresar()">
+            <i class="fas fa-arrow-left"></i> Regresar
+        </button>
+    </div>
+
+    <!-- Include your Bootstrap JS link and any other necessary scripts -->
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    
+    <script>
+        function regresar() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>

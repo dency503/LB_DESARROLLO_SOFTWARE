@@ -4,10 +4,9 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Agregar Categoría</title>
+    <title>Agregar Categoría | Ferreteria</title>
     <!-- Add links to Bootstrap and Font Awesome -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Add some custom styling -->
     <style>
@@ -17,8 +16,8 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="mt-5 mb-4">Agregar Categoría</h1>
+    <div class="container mt-5">
+        <h1 class="mb-4">Agregar Categoría</h1>
         <form action="/Ferreteria/ServletPrincipal?accion=AgregarCategoria" method="post">
             <div class="form-group">
                 <label for="nombre">Nombre:</label>

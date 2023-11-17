@@ -7,6 +7,8 @@ package Servlets;
 import Models.CategoriaModel;
 import Models.EmpleadoModel;
 import Models.ClienteModel;
+import Models.Compra;
+import Models.Producto;
 import Operaciones.Conexion;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -72,6 +74,7 @@ public class ServletPrincipal extends HttpServlet {
             CategoriaModel categoria = new CategoriaModel();
             categoria.setIdCategoria(rs.getInt("idCategoria"));
             categoria.setNombre(rs.getString("nombre"));
+            
             categoria.setDescripcion(rs.getString("descripcion"));
             listaCategorias.add(categoria);
         }
@@ -105,8 +108,63 @@ public class ServletPrincipal extends HttpServlet {
             e.printStackTrace(); // Este es solo un ejemplo. En un entorno de producción, deberías manejar la excepción de forma adecuada.
         }
         return listaEmpleados;
-    }
+    }public ArrayList<Compra> mostrarCompras() {
+    ArrayList<Compra> listaCompras = new ArrayList<>();
 
+    try (Connection connection = Conexion.obtenerConexion();
+         PreparedStatement pstmt = connection.prepareStatement(
+                "SELECT c.idCompra, c.IDProveedor, p.Nombre, c.IDEmpleado, e.Nombres, c.FechaCompra, c.MontoCompra, c.FechaCreacion " +
+                "FROM Compras c " +
+                "JOIN Proveedores p ON c.IDProveedor = p.IDProveedor " +
+                "JOIN Empleados e ON c.IDEmpleado = e.IDEmpleado"
+         );
+         ResultSet rs = pstmt.executeQuery()) {
+
+        while (rs.next()) {
+            Compra compra = new Compra();
+            compra.setIdCompra(rs.getInt("idCompra"));
+            compra.setIdProveedor(rs.getInt("IDProveedor"));
+            compra.setNombreProveedor(rs.getString("Nombre"));
+            compra.setIdEmpleado(rs.getInt("IDEmpleado"));
+            compra.setNombreEmpleado(rs.getString("Nombres"));
+            compra.setFechaCompra(rs.getDate("FechaCompra"));
+            compra.setMontoCompra(rs.getDouble("MontoCompra"));
+            compra.setFechaCreacion(rs.getDate("FechaCreacion"));
+
+            listaCompras.add(compra);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return listaCompras;
+}
+ public ArrayList<Producto> mostrarProductos() {
+        ArrayList<Producto> listaProductos = new ArrayList<>();
+
+        try (Connection connection = Conexion.obtenerConexion();
+             PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Productos");
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                Producto producto = new Producto();
+                producto.setIdProducto(rs.getInt("idProducto"));
+                producto.setNombre(rs.getString("Nombre"));
+                producto.setDescripcion(rs.getString("Descripcion"));
+                producto.setPrecio(rs.getDouble("Precio"));
+                producto.setStock(rs.getInt("Stock"));
+                producto.setIdCategoria(rs.getInt("IdCategoria"));
+                producto.setFechaCreacion(rs.getDate("FechaCreacion"));
+                producto.setImagenURL(rs.getString("ImagenURL"));
+                producto.setFechaModificacion(rs.getDate("FechaModificacion"));
+                producto.setActivo(rs.getBoolean("Activo"));
+
+                listaProductos.add(producto);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return listaProductos;
+    }
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
@@ -131,6 +189,7 @@ public class ServletPrincipal extends HttpServlet {
             case "RegistrarVentas" -> request.getRequestDispatcher("/RegistrarVentas.html").forward(request, response);
             case "RegistrarClientes" -> request.getRequestDispatcher("/RegistrarClientes.html").forward(request, response);
             case "RegistrarProveedores" -> request.getRequestDispatcher("/RegistrarProveedores.html").forward(request, response);
+            case "AgregarProducto" -> request.getRequestDispatcher("/opcionesUsuario/AgregarProducto.jsp").forward(request, response);
             case "GestionarEmpleados" -> {
                 request.setAttribute("empleadosList", mostrarEmpleados(request, response));
                 request.getRequestDispatcher("/GestionarEmpleados.jsp").forward(request, response);
@@ -143,21 +202,19 @@ public class ServletPrincipal extends HttpServlet {
                 request.setAttribute("categoriasList", mostrarCategorias());
                 request.getRequestDispatcher("/GestionarCategoria.jsp").forward(request, response);
             }
-             case "AgregarCategoria" -> {
-             ;
-                 request.getRequestDispatcher("/opcionesUsuario/AgregarCategoria.jsp").forward(request, response);
+             case "GestionarProductos" -> {
+                request.setAttribute("productosList", mostrarProductos());
+                request.getRequestDispatcher("/GestionarProductos.jsp").forward(request, response);
+            }
+             case "GestionarCompras" -> {
+                request.setAttribute("comprasList", mostrarCompras());
+                request.getRequestDispatcher("/GestionarCompras.jsp").forward(request, response);
             }
             default -> {
                 request.getRequestDispatcher("/error404").forward(request, response);
             }
         }
-        if (accion.equals("AgregarEmpleado")) {
-            if (request.getSession().getAttribute("exito") != null) {
-                request.setAttribute("exito", request.getSession().getAttribute("exito"));
-                request.getSession().removeAttribute("exito");
-            }
-            request.getRequestDispatcher("opcionesUsuario/AgregarEmpleado.jsp").forward(request, response);
-        }
+       
     }
 
     @Override
@@ -215,7 +272,15 @@ public class ServletPrincipal extends HttpServlet {
             }
              case "AgregarCategoria" -> {
                 agregarCategoria(request, response);
-                 response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=AgregarCategoria");
+                 response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarCategoria");
+            }
+             case "ModificarCategoria" -> {
+                modificarCategoria(request, response);
+               response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarCategorias");
+            }
+              case "EliminarCategoria" -> {
+                eliminarCategoria(request, response);
+                response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarCategorias");
             }
             default -> {
                 request.getRequestDispatcher("/error404").forward(request, response);
@@ -522,4 +587,91 @@ private void agregarCategoria(HttpServletRequest request, HttpServletResponse re
             Conexion.cerrarConexion(conn);
         }
     }
+    
+     private void modificarCategoria(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Retrieve parameters from the request
+        int idCategoria = Integer.parseInt(request.getParameter("idCategoria"));
+        String nuevoNombre = request.getParameter("nombre");
+        String nuevaDescripcion = request.getParameter("descripcion");
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+
+        try {
+            conn = Conexion.obtenerConexion();
+            String sql = "UPDATE Categorias SET Nombre=?, Descripcion=? WHERE idCategoria=?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, nuevoNombre);
+            pstmt.setString(2, nuevaDescripcion);
+            pstmt.setInt(3, idCategoria);
+
+            int registros = pstmt.executeUpdate();
+
+            if (registros > 0) {
+                request.getSession().setAttribute("exito", true);
+                request.getSession().setAttribute("mensaje", "Categoría modificada correctamente.");
+            } else {
+                request.getSession().setAttribute("exito", false);
+                request.getSession().setAttribute("mensaje", "No se pudo modificar la categoría. Por favor, revise los datos y vuelva a intentarlo.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            request.getSession().setAttribute("exito", false);
+            request.getSession().setAttribute("mensaje", "Error al modificar la categoría: " + e.getMessage());
+        } finally {
+            try {
+                if (pstmt != null) {
+                    pstmt.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+       
+    }
+public void eliminarCategoria(HttpServletRequest request, HttpServletResponse response) {
+    Connection conn = null;
+    PreparedStatement pstmt = null;
+
+    try {
+        conn = Conexion.obtenerConexion();
+        String sql = "DELETE FROM Categorias WHERE idCategoria=?";
+        int idCategoria = Integer.parseInt(request.getParameter("idCategoria"));
+
+        pstmt = conn.prepareStatement(sql);
+        pstmt.setInt(1, idCategoria);
+
+        int filasAfectadas = pstmt.executeUpdate();
+
+        if (filasAfectadas > 0) {
+            request.getSession().setAttribute("exito", true);
+            request.getSession().setAttribute("mensaje", "Categoría eliminada correctamente.");
+        } else {
+            request.getSession().setAttribute("exito", false);
+            request.getSession().setAttribute("mensaje", "No se pudo eliminar la categoría. Por favor, revise los datos y vuelva a intentarlo.");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+        request.getSession().setAttribute("exito", false);
+        request.getSession().setAttribute("mensaje", "Error al eliminar la categoría: " + e.getMessage());
+    } finally {
+        try {
+            if (pstmt != null) {
+                pstmt.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+    // Add other methods for different actions if needed
+
 }
