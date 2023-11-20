@@ -4,16 +4,20 @@
  */
 package Servlets;
 
+import java.sql.Statement;
+
 import Models.CategoriaModel;
 import Models.EmpleadoModel;
 import Models.ClienteModel;
-import Models.Compra;
+import Models.*;
 import Models.Producto;
 import Operaciones.Conexion;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -21,7 +25,22 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ServletPrincipal extends HttpServlet {
 
@@ -41,12 +60,11 @@ public class ServletPrincipal extends HttpServlet {
             out.println("</html>");
         }
     }
- public ArrayList<ClienteModel> mostrarClientes() {
+
+    public ArrayList<ClienteModel> mostrarClientes() {
         ArrayList<ClienteModel> listaClientes = new ArrayList<>();
 
-        try (Connection connection = Conexion.obtenerConexion();
-             PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Clientes");
-             ResultSet rs = pstmt.executeQuery()) {
+        try (Connection connection = Conexion.obtenerConexion(); PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Clientes"); ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
                 ClienteModel cliente = new ClienteModel();
@@ -59,31 +77,156 @@ public class ServletPrincipal extends HttpServlet {
             }
         } catch (SQLException e) {
             // Manejar la excepción SQLException aquí, por ejemplo, registrar el error o lanzar una excepción personalizada.
-            e.printStackTrace(); // Este es solo un ejemplo. En un entorno de producción, deberías manejar la excepción de forma adecuada.
+            // Este es solo un ejemplo. En un entorno de producción, deberías manejar la excepción de forma adecuada.
         }
         return listaClientes;
     }
- public ArrayList<CategoriaModel> mostrarCategorias() {
-    ArrayList<CategoriaModel> listaCategorias = new ArrayList<>();
 
-    try (Connection connection = Conexion.obtenerConexion();
-         PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Categorias");
-         ResultSet rs = pstmt.executeQuery()) {
+    public ArrayList<CategoriaModel> mostrarCategorias() {
+        ArrayList<CategoriaModel> listaCategorias = new ArrayList<>();
 
-        while (rs.next()) {
-            CategoriaModel categoria = new CategoriaModel();
-            categoria.setIdCategoria(rs.getInt("idCategoria"));
-            categoria.setNombre(rs.getString("nombre"));
-            
-            categoria.setDescripcion(rs.getString("descripcion"));
-            listaCategorias.add(categoria);
+        try (Connection connection = Conexion.obtenerConexion(); PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Categorias"); ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                CategoriaModel categoria = new CategoriaModel();
+                categoria.setIdCategoria(rs.getInt("idCategoria"));
+                categoria.setNombre(rs.getString("nombre"));
+
+                categoria.setDescripcion(rs.getString("descripcion"));
+                listaCategorias.add(categoria);
+            }
+        } catch (SQLException e) {
+            // Handle the SQLException here, e.g., log the error or throw a custom exception.
+            // This is just an example. In a production environment, you should handle the exception appropriately.
         }
-    } catch (SQLException e) {
-        // Handle the SQLException here, e.g., log the error or throw a custom exception.
-        e.printStackTrace(); // This is just an example. In a production environment, you should handle the exception appropriately.
+        return listaCategorias;
+
     }
-    return listaCategorias;
-}
+
+    public void obtenerEmpleados(HttpServletResponse response) throws IOException {
+        ArrayList<EmpleadoModel> listaEmpleados = new ArrayList<>();
+
+        try (Connection connection = Conexion.obtenerConexion(); PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Empleados"); ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                EmpleadoModel empleado = new EmpleadoModel();
+                empleado.setIdEmpleado(rs.getInt("idEmpleado"));
+                empleado.setDui(rs.getString("DUI"));
+                empleado.setIsss(rs.getInt("ISSS"));
+                empleado.setNombres(rs.getString("Nombres"));
+                empleado.setApellidos(rs.getString("Apellidos"));
+                empleado.setFechaNacEmpleado(rs.getDate("FechaNacEmpleado"));
+                empleado.setTelefono(rs.getString("Telefono"));
+                empleado.setCorreo(rs.getString("Correo"));
+                empleado.setIdCargo(rs.getInt("ID_Cargo"));
+                empleado.setIdDireccion(rs.getInt("ID_Direccion"));
+                listaEmpleados.add(empleado);
+            }
+        } catch (SQLException e) {
+
+        }
+
+        // Convert the list to a JSON array
+        JSONArray jsonArray = new JSONArray();
+        for (EmpleadoModel empleado : listaEmpleados) {
+            JSONObject jsonEmpleado = new JSONObject();
+            jsonEmpleado.put("id", empleado.getIdEmpleado());
+            jsonEmpleado.put("dui", empleado.getDui());
+            jsonEmpleado.put("isss", empleado.getIsss());
+            jsonEmpleado.put("nombre", empleado.getNombres());
+            jsonEmpleado.put("apellidos", empleado.getApellidos());
+            jsonEmpleado.put("fechaNacEmpleado", empleado.getFechaNacEmpleado());
+            jsonEmpleado.put("telefono", empleado.getTelefono());
+            jsonEmpleado.put("correo", empleado.getCorreo());
+            jsonEmpleado.put("idCargo", empleado.getIdCargo());
+            jsonEmpleado.put("idDireccion", empleado.getIdDireccion());
+            jsonArray.put(jsonEmpleado);
+        }
+
+        // Send the JSON response to the client
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(jsonArray.toString());
+    }
+
+    public void obtenerProductos(HttpServletResponse response) throws IOException {
+        ArrayList<Producto> listaProductos = new ArrayList<>();
+
+        try (Connection connection = Conexion.obtenerConexion(); PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Productos where Activo=1"); ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                Producto producto = new Producto();
+                producto.setIdProducto(rs.getInt("idProducto"));
+                producto.setNombre(rs.getString("nombre"));
+                producto.setDescripcion(rs.getString("descripcion"));
+                producto.setPrecio(rs.getDouble("precio"));
+                producto.setStock(rs.getInt("stock"));
+                producto.setIdCategoria(rs.getInt("idCategoria"));
+                producto.setFechaCreacion(rs.getDate("fechaCreacion"));
+                producto.setImagenURL(rs.getString("imagenURL"));
+                producto.setFechaModificacion(rs.getDate("fechaModificacion"));
+                producto.setActivo(rs.getBoolean("activo"));
+                listaProductos.add(producto);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace(); // Handle the exception appropriately in a production environment
+        }
+
+        // Convert the list to a JSON array
+        JSONArray jsonArray = new JSONArray();
+        for (Producto producto : listaProductos) {
+            JSONObject jsonProducto = new JSONObject();
+            jsonProducto.put("id", producto.getIdProducto());
+            jsonProducto.put("nombre", producto.getNombre());
+            jsonProducto.put("descripcion", producto.getDescripcion());
+            jsonProducto.put("precio", producto.getPrecio());
+            jsonProducto.put("stock", producto.getStock());
+            jsonProducto.put("idCategoria", producto.getIdCategoria());
+            jsonProducto.put("fechaCreacion", producto.getFechaCreacion().toString());
+            jsonProducto.put("imagenURL", producto.getImagenURL());
+
+            jsonProducto.put("activo", producto.isActivo());
+            jsonArray.put(jsonProducto);
+        }
+
+        // Send the JSON response to the client
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(jsonArray.toString());
+    }
+
+    public void obtenerProveedores(HttpServletResponse response) throws IOException {
+        ArrayList<Proveedor> listaProveedores = new ArrayList<>();
+
+        try (Connection connection = Conexion.obtenerConexion(); PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Proveedores"); ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                Proveedor proveedor = new Proveedor();
+                proveedor.setIdProveedor(rs.getInt("idProveedor"));
+                proveedor.setTelefono(rs.getString("Telefono"));
+                proveedor.setIdDireccion(rs.getInt("idDireccion"));
+                proveedor.setNombre(rs.getString("Nombre"));
+                listaProveedores.add(proveedor);
+            }
+        } catch (SQLException e) {
+        }
+
+        // Convert the list to a JSON array
+        JSONArray jsonArray = new JSONArray();
+        for (Proveedor proveedor : listaProveedores) {
+            JSONObject jsonProveedor = new JSONObject();
+            jsonProveedor.put("id", proveedor.getIdProveedor());
+            jsonProveedor.put("telefono", proveedor.getTelefono());
+            jsonProveedor.put("idDireccion", proveedor.getIdDireccion());
+            jsonProveedor.put("nombre", proveedor.getNombre());
+            jsonArray.put(jsonProveedor);
+        }
+
+        // Send the JSON response to the client
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(jsonArray.toString());
+    }
 
     private ArrayList<EmpleadoModel> mostrarEmpleados(HttpServletRequest request, HttpServletResponse response) {
         ArrayList<EmpleadoModel> listaEmpleados = new ArrayList<>();
@@ -105,45 +248,331 @@ public class ServletPrincipal extends HttpServlet {
             }
         } catch (SQLException e) {
             // Manejar la excepción SQLException aquí, por ejemplo, registrar el error o lanzar una excepción personalizada.
-            e.printStackTrace(); // Este es solo un ejemplo. En un entorno de producción, deberías manejar la excepción de forma adecuada.
+            // Este es solo un ejemplo. En un entorno de producción, deberías manejar la excepción de forma adecuada.
         }
         return listaEmpleados;
-    }public ArrayList<Compra> mostrarCompras() {
-    ArrayList<Compra> listaCompras = new ArrayList<>();
-
-    try (Connection connection = Conexion.obtenerConexion();
-         PreparedStatement pstmt = connection.prepareStatement(
-                "SELECT c.idCompra, c.IDProveedor, p.Nombre, c.IDEmpleado, e.Nombres, c.FechaCompra, c.MontoCompra, c.FechaCreacion " +
-                "FROM Compras c " +
-                "JOIN Proveedores p ON c.IDProveedor = p.IDProveedor " +
-                "JOIN Empleados e ON c.IDEmpleado = e.IDEmpleado"
-         );
-         ResultSet rs = pstmt.executeQuery()) {
-
-        while (rs.next()) {
-            Compra compra = new Compra();
-            compra.setIdCompra(rs.getInt("idCompra"));
-            compra.setIdProveedor(rs.getInt("IDProveedor"));
-            compra.setNombreProveedor(rs.getString("Nombre"));
-            compra.setIdEmpleado(rs.getInt("IDEmpleado"));
-            compra.setNombreEmpleado(rs.getString("Nombres"));
-            compra.setFechaCompra(rs.getDate("FechaCompra"));
-            compra.setMontoCompra(rs.getDouble("MontoCompra"));
-            compra.setFechaCreacion(rs.getDate("FechaCreacion"));
-
-            listaCompras.add(compra);
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
     }
-    return listaCompras;
-}
- public ArrayList<Producto> mostrarProductos() {
+
+    public void agregarCompra(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        int proveedor = Integer.parseInt(Objects.requireNonNullElse(request.getParameter("proveedor"), "0"));
+        int empleado = Integer.parseInt(request.getParameter("empleado"));
+
+        Date fechaCompra = Optional.ofNullable(request.getParameter("fechaCompra"))
+                .map(s -> {
+                    try {
+                        return new SimpleDateFormat("yyyy-MM-dd").parse(s);
+                    } catch (ParseException e) {
+                        return null;
+                    }
+                })
+                .orElse(null);
+
+        Item[] productos = Optional.ofNullable(request.getParameter("productos[]"))
+                .map((String jsonArray) -> {
+                    try {
+                        ObjectMapper objectMapper = new ObjectMapper();
+
+                        // Intenta deserializar como un array de Item
+                        return objectMapper.readValue(jsonArray, Item[].class);
+
+                    } catch (IOException e) {
+                        try {
+                            ObjectMapper objectMapper = new ObjectMapper();
+
+                            // Intenta deserializar como un solo objeto Item dentro de un array
+                            Item[] singleItemArray = objectMapper.readValue(jsonArray, Item[].class);
+                            return singleItemArray;
+
+                        } catch (IOException innerException) {
+                            innerException.printStackTrace();
+                            return new Item[0];
+                        }
+                    }
+                })
+                .orElse(new Item[0]);
+
+        try (Connection conn = Conexion.obtenerConexion(); PreparedStatement pstmtCompra = conn.prepareStatement("INSERT INTO Compras (IDProveedor, IDEmpleado, FechaCompra) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS); PreparedStatement pstmtDetalleCompra = conn.prepareStatement("INSERT INTO DetalleCompras (idCompra, idProducto, Cantidad, PrecioUnitario) VALUES (?, ?, ?, ?)")) {
+            conn.setAutoCommit(false);
+            pstmtCompra.setInt(1, proveedor);
+            pstmtCompra.setInt(2, empleado);
+            pstmtCompra.setDate(3, new java.sql.Date(fechaCompra.getTime()));
+
+            int registrosCompra = pstmtCompra.executeUpdate();
+
+            if (registrosCompra > 0) {
+                ResultSet generatedKeys = pstmtCompra.getGeneratedKeys();
+                int idCompra = 0;
+
+                if (generatedKeys.next()) {
+                    idCompra = generatedKeys.getInt(1);
+                }
+                System.out.println("el id es: " + idCompra);
+                for (Item producto : productos) {
+                    if (producto.getId() != 0) {
+                        pstmtDetalleCompra.setInt(1, idCompra);
+                        pstmtDetalleCompra.setInt(2, producto.getId());
+                        pstmtDetalleCompra.setInt(3, producto.getCantidad());
+                        pstmtDetalleCompra.setBigDecimal(4, producto.getPrecioUnitario());
+                        pstmtDetalleCompra.addBatch();
+                    }
+                }
+
+                int[] registrosDetalleCompra = pstmtDetalleCompra.executeBatch();
+
+                if (registrosDetalleCompra.length > 0 && registrosDetalleCompra.length == productos.length) {
+                    System.out.println("Compra guardada exitosamente");
+                    conn.commit();
+                } else {
+                    System.out.println("Error al guardar detalles de la compra");
+                    conn.rollback();
+                }
+            } else {
+                System.out.println("Error al guardar la compra");
+                conn.rollback();
+            }
+        } catch (SQLException e) {
+
+            System.out.println("Error al guardar la compra: " + e.getMessage());
+        }
+    }
+
+    public void modificarCompra(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        int idCompra = Integer.parseInt(request.getParameter("idCompra")); // Assuming you have a parameter for the ID of the purchase to modify
+
+        // Retrieve updated information from the request parameters
+        int proveedor = Integer.parseInt(Objects.requireNonNullElse(request.getParameter("proveedor"), "0"));
+        int empleado = Integer.parseInt(request.getParameter("empleado"));
+
+        LocalDate fechaCompra = Optional.ofNullable(request.getParameter("fechaCompra"))
+                .map(LocalDate::parse)
+                .orElse(null);
+
+        Item[] productos = Optional.ofNullable(request.getParameter("productos[]"))
+                .map((String jsonArray) -> {
+                    try {
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        return objectMapper.readValue(jsonArray, Item[].class);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return new Item[0];
+                    }
+                })
+                .orElse(new Item[0]);
+
+        try (Connection conn = Conexion.obtenerConexion(); PreparedStatement pstmtCompra = conn.prepareStatement("UPDATE Compras SET IDProveedor=?, IDEmpleado=?, FechaCompra=? WHERE IDCompra=?"); PreparedStatement pstmtDeleteDetalle = conn.prepareStatement("DELETE FROM DetalleCompras WHERE idCompra=?"); PreparedStatement pstmtInsertDetalle = conn.prepareStatement("INSERT INTO DetalleCompras (idCompra, idProducto, Cantidad, PrecioUnitario) VALUES (?, ?, ?, ?)")) {
+
+            conn.setAutoCommit(false);
+            pstmtCompra.setInt(1, proveedor);
+            pstmtCompra.setInt(2, empleado);
+            pstmtCompra.setDate(3, java.sql.Date.valueOf(fechaCompra));
+            pstmtCompra.setInt(4, idCompra);
+
+            int registrosCompra = pstmtCompra.executeUpdate();
+
+            if (registrosCompra > 0) {
+                pstmtDeleteDetalle.setInt(1, idCompra);
+                pstmtDeleteDetalle.executeUpdate();
+
+                for (Item producto : productos) {
+                    if (producto.getId() != 0) {
+                        pstmtInsertDetalle.setInt(1, idCompra);
+                        pstmtInsertDetalle.setInt(2, producto.getId());
+                        pstmtInsertDetalle.setInt(3, producto.getCantidad());
+                        pstmtInsertDetalle.setBigDecimal(4, producto.getPrecioUnitario());
+                        pstmtInsertDetalle.addBatch();
+                    }
+                }
+
+                int[] registrosDetalleCompra = pstmtInsertDetalle.executeBatch();
+
+                if (registrosDetalleCompra.length > 0 && registrosDetalleCompra.length == productos.length) {
+                    System.out.println("Compra modificada exitosamente");
+                    conn.commit();
+                } else {
+                    System.out.println("Error al modificar detalles de la compra");
+                    conn.rollback();
+                }
+            } else {
+                System.out.println("Error al modificar la compra");
+                conn.rollback();
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al modificar la compra: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public void eliminarCompra(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        int idCompra = Integer.parseInt(request.getParameter("idCompra")); // Assuming you have a parameter for the ID of the purchase to delete
+
+        try (Connection conn = Conexion.obtenerConexion(); PreparedStatement pstmtDeleteDetalle = conn.prepareStatement("DELETE FROM DetalleCompras WHERE idCompra=?"); PreparedStatement pstmtDeleteCompra = conn.prepareStatement("DELETE FROM Compras WHERE IDCompra=?")) {
+
+            conn.setAutoCommit(false);
+
+            pstmtDeleteDetalle.setInt(1, idCompra);
+            int registrosDetalleCompra = pstmtDeleteDetalle.executeUpdate();
+
+            pstmtDeleteCompra.setInt(1, idCompra);
+            int registrosCompra = pstmtDeleteCompra.executeUpdate();
+
+            if (registrosDetalleCompra > 0 && registrosCompra > 0) {
+                System.out.println("Compra eliminada exitosamente");
+                conn.commit();
+            } else {
+                System.out.println("Error al eliminar la compra");
+                conn.rollback();
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al eliminar la compra: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public ArrayList<Compra> mostrarCompras() {
+        ArrayList<Compra> listaCompras = new ArrayList<>();
+
+        try (Connection connection = Conexion.obtenerConexion(); PreparedStatement pstmt = connection.prepareStatement(
+                "SELECT c.idCompra, c.IDProveedor, p.Nombre AS NombreProveedor, c.IDEmpleado, e.Nombres AS NombreEmpleado, c.FechaCompra, c.MontoCompra, c.FechaCreacion, "
+                + "d.idDetalleCompra, d.idProducto, d.cantidad, d.precioUnitario, "
+                + "pr.nombre AS NombreProducto, pr.descripcion AS DescripcionProducto, pr.precio AS PrecioProducto, pr.stock AS StockProducto, pr.idCategoria AS IDCategoriaProducto, "
+                + "pr.fechaCreacion AS FechaCreacionProducto, pr.imagenURL AS ImagenURLProducto, pr.fechaModificacion AS FechaModificacionProducto, pr.activo AS ActivoProducto "
+                + "FROM Compras c "
+                + "JOIN Proveedores p ON c.IDProveedor = p.IDProveedor "
+                + "JOIN Empleados e ON c.IDEmpleado = e.IDEmpleado "
+                + "JOIN DetalleCompras d ON c.idCompra = d.idCompra "
+                + "JOIN Productos pr ON d.idProducto = pr.idProducto"
+        ); ResultSet rs = pstmt.executeQuery()) {
+
+            Map<Integer, Compra> mapaCompras = new HashMap<>();
+
+            while (rs.next()) {
+                int idCompra = rs.getInt("idCompra");
+                Compra compra = mapaCompras.get(idCompra);
+
+                if (compra == null) {
+                    compra = new Compra();
+                    compra.setIdCompra(idCompra);
+                    compra.setIdProveedor(rs.getInt("IDProveedor"));
+                    compra.setNombreProveedor(rs.getString("NombreProveedor"));
+                    compra.setIdEmpleado(rs.getInt("IDEmpleado"));
+                    compra.setNombreEmpleado(rs.getString("NombreEmpleado"));
+                    compra.setFechaCompra(rs.getDate("FechaCompra"));
+                    compra.setMontoCompra(rs.getDouble("MontoCompra"));
+                    compra.setFechaCreacion(rs.getDate("FechaCreacion"));
+
+                    mapaCompras.put(idCompra, compra);
+                }
+
+                DetalleCompra detalle = new DetalleCompra();
+                detalle.setIdDetalleCompra(rs.getInt("idDetalleCompra"));
+                detalle.setIdProducto(rs.getInt("idProducto"));
+                detalle.setCantidad(rs.getInt("cantidad"));
+                detalle.setPrecioUnitario(rs.getDouble("precioUnitario"));
+
+                Producto producto = new Producto();
+                producto.setIdProducto(rs.getInt("idProducto"));
+                producto.setNombre(rs.getString("NombreProducto"));
+                producto.setDescripcion(rs.getString("DescripcionProducto"));
+                producto.setPrecio(rs.getDouble("PrecioProducto"));
+                producto.setStock(rs.getInt("StockProducto"));
+                producto.setIdCategoria(rs.getInt("IDCategoriaProducto"));
+                producto.setFechaCreacion(rs.getDate("FechaCreacionProducto"));
+                producto.setImagenURL(rs.getString("ImagenURLProducto"));
+                producto.setFechaModificacion(rs.getDate("FechaModificacionProducto"));
+                producto.setActivo(rs.getBoolean("ActivoProducto"));
+
+                detalle.setProducto(producto);
+
+                compra.getDetalleCompra().add(detalle);
+            }
+
+            listaCompras.addAll(mapaCompras.values());
+
+        } catch (SQLException e) {
+
+        }
+
+        return listaCompras;
+    }
+
+    public ArrayList<Compra> mostrarComprasPorId(HttpServletRequest request) {
+        int idCompra = Integer.parseInt(request.getParameter("idCompra"));
+        ArrayList<Compra> listaCompras = new ArrayList<>();
+
+        try (Connection connection = Conexion.obtenerConexion(); PreparedStatement pstmt = connection.prepareStatement(
+                "SELECT c.idCompra, c.IDProveedor, p.Nombre AS NombreProveedor, c.IDEmpleado, e.Nombres AS NombreEmpleado, c.FechaCompra, c.MontoCompra, c.FechaCreacion, "
+                + "d.idDetalleCompra, d.idProducto, d.cantidad, d.precioUnitario, "
+                + "pr.nombre AS NombreProducto, pr.descripcion AS DescripcionProducto, pr.precio AS PrecioProducto, pr.stock AS StockProducto, pr.idCategoria AS IDCategoriaProducto, "
+                + "pr.fechaCreacion AS FechaCreacionProducto, pr.imagenURL AS ImagenURLProducto, pr.fechaModificacion AS FechaModificacionProducto, pr.activo AS ActivoProducto "
+                + "FROM Compras c "
+                + "JOIN Proveedores p ON c.IDProveedor = p.IDProveedor "
+                + "JOIN Empleados e ON c.IDEmpleado = e.IDEmpleado "
+                + "JOIN DetalleCompras d ON c.idCompra = d.idCompra "
+                + "JOIN Productos pr ON d.idProducto = pr.idProducto "
+                + "WHERE c.idCompra = ?"
+        )) {
+
+            pstmt.setInt(1, idCompra);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+
+                Map<Integer, Compra> mapaCompras = new HashMap<>();
+
+                while (rs.next()) {
+                    int idCompraResultado = rs.getInt("idCompra");
+                    Compra compra = mapaCompras.get(idCompraResultado);
+
+                    if (compra == null) {
+                        compra = new Compra();
+                        compra.setIdCompra(idCompraResultado);
+                        compra.setIdProveedor(rs.getInt("IDProveedor"));
+                        compra.setNombreProveedor(rs.getString("NombreProveedor"));
+                        compra.setIdEmpleado(rs.getInt("IDEmpleado"));
+                        compra.setNombreEmpleado(rs.getString("NombreEmpleado"));
+                        compra.setFechaCompra(rs.getDate("FechaCompra"));
+                        compra.setMontoCompra(rs.getDouble("MontoCompra"));
+                        compra.setFechaCreacion(rs.getDate("FechaCreacion"));
+
+                        mapaCompras.put(idCompraResultado, compra);
+                    }
+
+                    DetalleCompra detalle = new DetalleCompra();
+                    detalle.setIdDetalleCompra(rs.getInt("idDetalleCompra"));
+                    detalle.setIdProducto(rs.getInt("idProducto"));
+                    detalle.setCantidad(rs.getInt("cantidad"));
+                    detalle.setPrecioUnitario(rs.getDouble("precioUnitario"));
+
+                    Producto producto = new Producto();
+                    producto.setIdProducto(rs.getInt("idProducto"));
+                    producto.setNombre(rs.getString("NombreProducto"));
+                    producto.setDescripcion(rs.getString("DescripcionProducto"));
+                    producto.setPrecio(rs.getDouble("PrecioProducto"));
+                    producto.setStock(rs.getInt("StockProducto"));
+                    producto.setIdCategoria(rs.getInt("IDCategoriaProducto"));
+                    producto.setFechaCreacion(rs.getDate("FechaCreacionProducto"));
+                    producto.setImagenURL(rs.getString("ImagenURLProducto"));
+                    producto.setFechaModificacion(rs.getDate("FechaModificacionProducto"));
+                    producto.setActivo(rs.getBoolean("ActivoProducto"));
+
+                    detalle.setProducto(producto);
+
+                    compra.getDetalleCompra().add(detalle);
+                }
+
+                listaCompras.addAll(mapaCompras.values());
+            }
+        } catch (SQLException e) {
+            // Manejar la excepción
+            e.printStackTrace();
+        }
+
+        return listaCompras;
+    }
+
+    public ArrayList<Producto> mostrarProductos() {
         ArrayList<Producto> listaProductos = new ArrayList<>();
 
-        try (Connection connection = Conexion.obtenerConexion();
-             PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Productos");
-             ResultSet rs = pstmt.executeQuery()) {
+        try (Connection connection = Conexion.obtenerConexion(); PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Productos"); ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
                 Producto producto = new Producto();
@@ -161,10 +590,11 @@ public class ServletPrincipal extends HttpServlet {
                 listaProductos.add(producto);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+
         }
         return listaProductos;
     }
+
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
@@ -181,40 +611,72 @@ public class ServletPrincipal extends HttpServlet {
         String accion = request.getParameter("accion");
         if (null == accion) {
             request.getRequestDispatcher("/Login.jsp").forward(request, response);
-        } else switch (accion) {
-            case "Login" -> request.getRequestDispatcher("/Login.jsp").forward(request, response);
-            case "RegistrarEmpleados" -> request.getRequestDispatcher("/RegistrarEmpleados.html").forward(request, response);
-            case "RegistrarCategorias" -> request.getRequestDispatcher("/RegistrarCategorias.html").forward(request, response);
-            case "RegistrarCompras" -> request.getRequestDispatcher("/RegistrarCompras.html").forward(request, response);
-            case "RegistrarVentas" -> request.getRequestDispatcher("/RegistrarVentas.html").forward(request, response);
-            case "RegistrarClientes" -> request.getRequestDispatcher("/RegistrarClientes.html").forward(request, response);
-            case "RegistrarProveedores" -> request.getRequestDispatcher("/RegistrarProveedores.html").forward(request, response);
-            case "AgregarProducto" -> request.getRequestDispatcher("/opcionesUsuario/AgregarProducto.jsp").forward(request, response);
-            case "GestionarEmpleados" -> {
-                request.setAttribute("empleadosList", mostrarEmpleados(request, response));
-                request.getRequestDispatcher("/GestionarEmpleados.jsp").forward(request, response);
-            }
-             case "GestionarClientes" -> {
-                request.setAttribute("clientesList", mostrarClientes());
-                request.getRequestDispatcher("/GestionarClientes.jsp").forward(request, response);
-            }
-             case "GestionarCategorias" -> {
-                request.setAttribute("categoriasList", mostrarCategorias());
-                request.getRequestDispatcher("/GestionarCategoria.jsp").forward(request, response);
-            }
-             case "GestionarProductos" -> {
-                request.setAttribute("productosList", mostrarProductos());
-                request.getRequestDispatcher("/GestionarProductos.jsp").forward(request, response);
-            }
-             case "GestionarCompras" -> {
-                request.setAttribute("comprasList", mostrarCompras());
-                request.getRequestDispatcher("/GestionarCompras.jsp").forward(request, response);
-            }
-            default -> {
-                request.getRequestDispatcher("/error404").forward(request, response);
+        } else {
+            switch (accion) {
+                case "Login" ->
+                    request.getRequestDispatcher("/Login.jsp").forward(request, response);
+                case "RegistrarEmpleados" ->
+                    request.getRequestDispatcher("/RegistrarEmpleados.html").forward(request, response);
+                case "RegistrarCategorias" ->
+                    request.getRequestDispatcher("/RegistrarCategorias.html").forward(request, response);
+                case "RegistrarCompras" ->
+                    request.getRequestDispatcher("/RegistrarCompras.html").forward(request, response);
+                case "RegistrarVentas" ->
+                    request.getRequestDispatcher("/RegistrarVentas.html").forward(request, response);
+                case "RegistrarClientes" ->
+                    request.getRequestDispatcher("/RegistrarClientes.html").forward(request, response);
+                case "RegistrarProveedores" ->
+                    request.getRequestDispatcher("/RegistrarProveedores.html").forward(request, response);
+                case "AgregarProducto" ->
+                    request.getRequestDispatcher("/opcionesUsuario/AgregarProducto.jsp").forward(request, response);
+                case "GestionarEmpleados" -> {
+                    request.setAttribute("empleadosList", mostrarEmpleados(request, response));
+                    request.getRequestDispatcher("/GestionarEmpleados.jsp").forward(request, response);
+                }
+                case "GestionarClientes" -> {
+                    request.setAttribute("clientesList", mostrarClientes());
+                    request.getRequestDispatcher("/GestionarClientes.jsp").forward(request, response);
+                }
+                case "GestionarCategorias" -> {
+                    request.setAttribute("categoriasList", mostrarCategorias());
+                    request.getRequestDispatcher("/GestionarCategoria.jsp").forward(request, response);
+                }
+                case "GestionarProductos" -> {
+                    request.setAttribute("productosList", mostrarProductos());
+                    request.getRequestDispatcher("/GestionarProductos.jsp").forward(request, response);
+                }
+                case "GestionarCompras" -> {
+                    request.setAttribute("comprasList", mostrarCompras());
+                    request.getRequestDispatcher("/GestionarCompras.jsp").forward(request, response);
+                }
+                case "AgregarCompra" -> {
+
+                    request.getRequestDispatcher("opcionesUsuario/AgregarCompra.jsp").forward(request, response);
+                }
+                case "ObtenerEmpleados" -> {
+                    obtenerEmpleados(response);
+
+                }
+                case "ObtenerProveedores" -> {
+                    obtenerProveedores(response);
+
+                }
+                case "ObtenerProductos" -> {
+                    obtenerProductos(response);
+
+                }
+                case "MostrarComprasPorId" -> {
+                    request.setAttribute("comprasList", mostrarComprasPorId(request));
+
+                    request.getRequestDispatcher("opcionesUsuario/ModificarCompra.jsp").forward(request, response);
+                }
+
+                default -> {
+                    request.getRequestDispatcher("/error404").forward(request, response);
+                }
             }
         }
-       
+
     }
 
     @Override
@@ -270,17 +732,25 @@ public class ServletPrincipal extends HttpServlet {
                 eliminarCliente(request, response);
                 response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarClientes");
             }
-             case "AgregarCategoria" -> {
+            case "AgregarCategoria" -> {
                 agregarCategoria(request, response);
-                 response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarCategoria");
+                response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarCategoria");
             }
-             case "ModificarCategoria" -> {
+            case "ModificarCategoria" -> {
                 modificarCategoria(request, response);
-               response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarCategorias");
+                response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarCategorias");
             }
-              case "EliminarCategoria" -> {
+            case "EliminarCategoria" -> {
                 eliminarCategoria(request, response);
                 response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarCategorias");
+            }
+            case "AgregarCompras" -> {
+                agregarCompra(request, response);
+                response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarCompras");
+            }
+            case "ModificarCompra" -> {
+                modificarCompra(request, response);
+                response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarCompras");
             }
             default -> {
                 request.getRequestDispatcher("/error404").forward(request, response);
@@ -298,46 +768,47 @@ public class ServletPrincipal extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-private void agregarCategoria(HttpServletRequest request, HttpServletResponse response) {
-    String nombre = request.getParameter("nombre");
-    String descripcion = request.getParameter("descripcion");
 
-    Connection conn = null;
-    PreparedStatement pstmt = null;
+    private void agregarCategoria(HttpServletRequest request, HttpServletResponse response) {
+        String nombre = request.getParameter("nombre");
+        String descripcion = request.getParameter("descripcion");
 
-    try {
-        conn = Conexion.obtenerConexion();
-        String sql = "INSERT INTO Categorias (Nombre, Descripcion) VALUES (?, ?)";
-        pstmt = conn.prepareStatement(sql);
-        pstmt.setString(1, nombre);
-        pstmt.setString(2, descripcion);
+        Connection conn = null;
+        PreparedStatement pstmt = null;
 
-        int registros = pstmt.executeUpdate();
-
-        if (registros > 0) {
-            request.getSession().setAttribute("exito", true);
-            request.getSession().setAttribute("mensaje", "Categoría agregada correctamente.");
-        } else {
-            request.getSession().setAttribute("exito", false);
-            request.getSession().setAttribute("mensaje", "No se pudo agregar la categoría. Por favor, revise los datos y vuelva a intentarlo.");
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
-        request.getSession().setAttribute("exito", false);
-        request.getSession().setAttribute("mensaje", "Error al agregar la categoría: " + e.getMessage());
-    } finally {
         try {
-            if (pstmt != null) {
-                pstmt.close();
-            }
-            if (conn != null) {
-                conn.close();
+            conn = Conexion.obtenerConexion();
+            String sql = "INSERT INTO Categorias (Nombre, Descripcion) VALUES (?, ?)";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, nombre);
+            pstmt.setString(2, descripcion);
+
+            int registros = pstmt.executeUpdate();
+
+            if (registros > 0) {
+                request.getSession().setAttribute("exito", true);
+                request.getSession().setAttribute("mensaje", "Categoría agregada correctamente.");
+            } else {
+                request.getSession().setAttribute("exito", false);
+                request.getSession().setAttribute("mensaje", "No se pudo agregar la categoría. Por favor, revise los datos y vuelva a intentarlo.");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+
+            request.getSession().setAttribute("exito", false);
+            request.getSession().setAttribute("mensaje", "Error al agregar la categoría: " + e.getMessage());
+        } finally {
+            try {
+                if (pstmt != null) {
+                    pstmt.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+
+            }
         }
     }
-}
 
     private void agregarEmpleado(HttpServletRequest request, HttpServletResponse response) {
         String dui = request.getParameter("dui");
@@ -377,7 +848,7 @@ private void agregarCategoria(HttpServletRequest request, HttpServletResponse re
                 request.getSession().setAttribute("mensaje", "No se pudo agregar el empleado. Por favor, revise los datos y vuelva a intentarlo.");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+
             request.getSession().setAttribute("exito", false);
             request.getSession().setAttribute("mensaje", "Error al agregar el empleado: " + e.getMessage());
         } finally {
@@ -389,7 +860,7 @@ private void agregarCategoria(HttpServletRequest request, HttpServletResponse re
                     conn.close();
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+
             }
 
         }
@@ -440,7 +911,6 @@ private void agregarCategoria(HttpServletRequest request, HttpServletResponse re
 
     private void eliminarEmpleado(HttpServletRequest request, HttpServletResponse response) {
         int idEmpleado = Integer.parseInt(request.getParameter("idEmpleado"));
-        
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -450,7 +920,6 @@ private void agregarCategoria(HttpServletRequest request, HttpServletResponse re
             String sql = "DELETE FROM Empleados where idEmpleado = ?";
             pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, idEmpleado);
-           
 
             int filasAfectadas = pstmt.executeUpdate();
 
@@ -462,12 +931,12 @@ private void agregarCategoria(HttpServletRequest request, HttpServletResponse re
             } else {
                 // No se encontró el registro para eliminar
                 // Puedes redirigir o mostrar un mensaje de error
-              request.getSession().setAttribute("exito", false);
+                request.getSession().setAttribute("exito", false);
                 request.getSession().setAttribute("mensaje", "No se pudo eliminar el empleado. Por favor, revise los datos y vuelva a intentarlo.");
             }
         } catch (SQLException e) {
             // Manejar excepciones de SQL
-            e.printStackTrace();
+
         } finally {
             // Cerrar conexiones y declaraciones
             try {
@@ -475,16 +944,17 @@ private void agregarCategoria(HttpServletRequest request, HttpServletResponse re
                     pstmt.close();
                 }
                 if (conn != null) {
-                    
+
                     Conexion.cerrarConexion(conn);
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+
             }
         }
 
     }
- public void agregarCliente(HttpServletRequest request, HttpServletResponse response) {
+
+    public void agregarCliente(HttpServletRequest request, HttpServletResponse response) {
         String dui = request.getParameter("dui");
         String nombres = request.getParameter("nombres");
         String apellidos = request.getParameter("apellidos");
@@ -512,21 +982,22 @@ private void agregarCategoria(HttpServletRequest request, HttpServletResponse re
                 request.getSession().setAttribute("mensaje", "No se pudo agregar el cliente. Por favor, revise los datos y vuelva a intentarlo.");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+
             request.getSession().setAttribute("exito", false);
             request.getSession().setAttribute("mensaje", "Error al agregar el cliente: " + e.getMessage());
         } finally {
             Conexion.cerrarConexion(conn);
         }
     }
- public void modificarCliente(HttpServletRequest request, HttpServletResponse response) {
+
+    public void modificarCliente(HttpServletRequest request, HttpServletResponse response) {
         Connection conn = null;
         PreparedStatement pstmt = null;
 
         try {
             conn = Conexion.obtenerConexion();
             String sql = "UPDATE Clientes SET DUI=?, Nombres=?, Apellidos=?, Telefono=? WHERE idCliente=?";
-            
+
             String dui = request.getParameter("dui");
             String nombres = request.getParameter("nombres");
             String apellidos = request.getParameter("apellidos");
@@ -550,7 +1021,7 @@ private void agregarCategoria(HttpServletRequest request, HttpServletResponse re
                 request.getSession().setAttribute("mensaje", "No se pudo modificar el cliente. Por favor, revise los datos y vuelva a intentarlo.");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+
             request.getSession().setAttribute("exito", false);
             request.getSession().setAttribute("mensaje", "Error al modificar el cliente: " + e.getMessage());
         } finally {
@@ -580,15 +1051,15 @@ private void agregarCategoria(HttpServletRequest request, HttpServletResponse re
                 request.getSession().setAttribute("mensaje", "No se pudo eliminar el cliente. Por favor, revise los datos y vuelva a intentarlo.");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+
             request.getSession().setAttribute("exito", false);
             request.getSession().setAttribute("mensaje", "Error al eliminar el cliente: " + e.getMessage());
         } finally {
             Conexion.cerrarConexion(conn);
         }
     }
-    
-     private void modificarCategoria(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+    private void modificarCategoria(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // Retrieve parameters from the request
         int idCategoria = Integer.parseInt(request.getParameter("idCategoria"));
         String nuevoNombre = request.getParameter("nombre");
@@ -615,7 +1086,7 @@ private void agregarCategoria(HttpServletRequest request, HttpServletResponse re
                 request.getSession().setAttribute("mensaje", "No se pudo modificar la categoría. Por favor, revise los datos y vuelva a intentarlo.");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+
             request.getSession().setAttribute("exito", false);
             request.getSession().setAttribute("mensaje", "Error al modificar la categoría: " + e.getMessage());
         } finally {
@@ -627,51 +1098,49 @@ private void agregarCategoria(HttpServletRequest request, HttpServletResponse re
                     conn.close();
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+
             }
         }
 
-       
     }
-public void eliminarCategoria(HttpServletRequest request, HttpServletResponse response) {
-    Connection conn = null;
-    PreparedStatement pstmt = null;
 
-    try {
-        conn = Conexion.obtenerConexion();
-        String sql = "DELETE FROM Categorias WHERE idCategoria=?";
-        int idCategoria = Integer.parseInt(request.getParameter("idCategoria"));
+    public void eliminarCategoria(HttpServletRequest request, HttpServletResponse response) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
 
-        pstmt = conn.prepareStatement(sql);
-        pstmt.setInt(1, idCategoria);
-
-        int filasAfectadas = pstmt.executeUpdate();
-
-        if (filasAfectadas > 0) {
-            request.getSession().setAttribute("exito", true);
-            request.getSession().setAttribute("mensaje", "Categoría eliminada correctamente.");
-        } else {
-            request.getSession().setAttribute("exito", false);
-            request.getSession().setAttribute("mensaje", "No se pudo eliminar la categoría. Por favor, revise los datos y vuelva a intentarlo.");
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
-        request.getSession().setAttribute("exito", false);
-        request.getSession().setAttribute("mensaje", "Error al eliminar la categoría: " + e.getMessage());
-    } finally {
         try {
-            if (pstmt != null) {
-                pstmt.close();
-            }
-            if (conn != null) {
-                conn.close();
+            conn = Conexion.obtenerConexion();
+            String sql = "DELETE FROM Categorias WHERE idCategoria=?";
+            int idCategoria = Integer.parseInt(request.getParameter("idCategoria"));
+
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, idCategoria);
+
+            int filasAfectadas = pstmt.executeUpdate();
+
+            if (filasAfectadas > 0) {
+                request.getSession().setAttribute("exito", true);
+                request.getSession().setAttribute("mensaje", "Categoría eliminada correctamente.");
+            } else {
+                request.getSession().setAttribute("exito", false);
+                request.getSession().setAttribute("mensaje", "No se pudo eliminar la categoría. Por favor, revise los datos y vuelva a intentarlo.");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+
+            request.getSession().setAttribute("exito", false);
+            request.getSession().setAttribute("mensaje", "Error al eliminar la categoría: " + e.getMessage());
+        } finally {
+            try {
+                if (pstmt != null) {
+                    pstmt.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+
+            }
         }
     }
-}
-
-    // Add other methods for different actions if needed
 
 }

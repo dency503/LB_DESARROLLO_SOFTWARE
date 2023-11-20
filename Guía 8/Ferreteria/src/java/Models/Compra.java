@@ -8,7 +8,9 @@ package Models;
  *
  * @author Home
  */
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class Compra {
     private int idCompra;
@@ -19,9 +21,34 @@ public class Compra {
     private Date fechaCreacion;
 private String nombreProveedor;
 private String nombreEmpleado;
+private List<DetalleCompra> detalleCompra;
     // Constructors, getters, setters
 
+    public List<DetalleCompra> getDetalleCompra() {
+        return detalleCompra;
+    }
+
+    public void setDetalleCompra(List<DetalleCompra> detalleCompra) {
+        this.detalleCompra = detalleCompra;
+    }
+
+    public Compra(int idCompra, int idProveedor, int idEmpleado, Date fechaCompra, double montoCompra, Date fechaCreacion, String nombreProveedor, String nombreEmpleado, List<DetalleCompra> detalleCompra) {
+        this.idCompra = idCompra;
+        this.idProveedor = idProveedor;
+        this.idEmpleado = idEmpleado;
+        this.fechaCompra = fechaCompra;
+        this.montoCompra = montoCompra;
+        this.fechaCreacion = fechaCreacion;
+        this.nombreProveedor = nombreProveedor;
+        this.nombreEmpleado = nombreEmpleado;
+        this.detalleCompra = detalleCompra;
+    }
+
+    
+
+
     public Compra() {
+          this.detalleCompra = new ArrayList<>();
     }
 
     public Compra(int idProveedor, int idEmpleado, Date fechaCompra, double montoCompra, Date fechaCreacion) {

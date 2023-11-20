@@ -1,10 +1,11 @@
+package Models;
 public class DetalleCompra {
     private int idDetalleCompra;
     private int idCompra;
     private int idProducto;
     private int cantidad;
     private double precioUnitario;
-
+private Producto producto;
     // Constructors, getters, setters
 
     public DetalleCompra() {
@@ -15,6 +16,14 @@ public class DetalleCompra {
         this.idProducto = idProducto;
         this.cantidad = cantidad;
         this.precioUnitario = precioUnitario;
+    }
+
+    public Producto getProducto() {
+        return producto;
+    }
+
+    public void setProducto(Producto producto) {
+        this.producto = producto;
     }
 
     public int getIdDetalleCompra() {
@@ -56,4 +65,15 @@ public class DetalleCompra {
     public void setPrecioUnitario(double precioUnitario) {
         this.precioUnitario = precioUnitario;
     }
+
+    public DetalleCompra(int idDetalleCompra, int idCompra, int idProducto, int cantidad, double precioUnitario, Producto producto) {
+        this.idDetalleCompra = idDetalleCompra;
+        this.idCompra = idCompra;
+        this.idProducto = idProducto;
+        this.cantidad = cantidad;
+        this.precioUnitario = precioUnitario;
+        this.producto = producto;
+    }
+
+    
 }
