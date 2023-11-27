@@ -7,14 +7,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DetalleCompra {
-    private int idDetalleCompra;
-    private int idCompra;
+public class DetallePedido {
+    private int idDetallePedido;
     private int idProducto;
     private int cantidad;
     private double precioUnitario;
-private Producto producto;
-    // Constructors, getters, setters
+    private Producto producto;
 
-    
+   
 }

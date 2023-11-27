@@ -6,9 +6,9 @@ package Servlets;
 
 import java.sql.Statement;
 
-import Models.CategoriaModel;
-import Models.EmpleadoModel;
-import Models.ClienteModel;
+import Models.Categoria;
+import Models.Empleado;
+import Models.Cliente;
 import Models.*;
 import Models.Producto;
 import Operaciones.Conexion;
@@ -61,13 +61,13 @@ public class ServletPrincipal extends HttpServlet {
         }
     }
 
-    public ArrayList<ClienteModel> mostrarClientes() {
-        ArrayList<ClienteModel> listaClientes = new ArrayList<>();
+    public ArrayList<Cliente> mostrarClientes() {
+        ArrayList<Cliente> listaClientes = new ArrayList<>();
 
         try (Connection connection = Conexion.obtenerConexion(); PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Clientes"); ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
-                ClienteModel cliente = new ClienteModel();
+                Cliente cliente = new Cliente();
                 cliente.setIdCliente(rs.getInt("idCliente"));
                 cliente.setDui(rs.getString("DUI"));
                 cliente.setNombres(rs.getString("Nombres"));
@@ -82,13 +82,13 @@ public class ServletPrincipal extends HttpServlet {
         return listaClientes;
     }
 
-    public ArrayList<CategoriaModel> mostrarCategorias() {
-        ArrayList<CategoriaModel> listaCategorias = new ArrayList<>();
+    public ArrayList<Categoria> mostrarCategorias() {
+        ArrayList<Categoria> listaCategorias = new ArrayList<>();
 
         try (Connection connection = Conexion.obtenerConexion(); PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Categorias"); ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
-                CategoriaModel categoria = new CategoriaModel();
+                Categoria categoria = new Categoria();
                 categoria.setIdCategoria(rs.getInt("idCategoria"));
                 categoria.setNombre(rs.getString("nombre"));
 
@@ -104,12 +104,12 @@ public class ServletPrincipal extends HttpServlet {
     }
 
     public void obtenerEmpleados(HttpServletResponse response) throws IOException {
-        ArrayList<EmpleadoModel> listaEmpleados = new ArrayList<>();
+        ArrayList<Empleado> listaEmpleados = new ArrayList<>();
 
         try (Connection connection = Conexion.obtenerConexion(); PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Empleados"); ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
-                EmpleadoModel empleado = new EmpleadoModel();
+                Empleado empleado = new Empleado();
                 empleado.setIdEmpleado(rs.getInt("idEmpleado"));
                 empleado.setDui(rs.getString("DUI"));
                 empleado.setIsss(rs.getInt("ISSS"));
@@ -128,7 +128,7 @@ public class ServletPrincipal extends HttpServlet {
 
         // Convert the list to a JSON array
         JSONArray jsonArray = new JSONArray();
-        for (EmpleadoModel empleado : listaEmpleados) {
+        for (Empleado empleado : listaEmpleados) {
             JSONObject jsonEmpleado = new JSONObject();
             jsonEmpleado.put("id", empleado.getIdEmpleado());
             jsonEmpleado.put("dui", empleado.getDui());
@@ -148,6 +148,37 @@ public class ServletPrincipal extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(jsonArray.toString());
     }
+public void obtenerCargos(HttpServletResponse response) throws IOException {
+    ArrayList<Cargo> listaCargos = new ArrayList<>();
+
+    try (Connection connection = Conexion.obtenerConexion();
+         PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Cargos");
+         ResultSet rs = pstmt.executeQuery()) {
+
+        while (rs.next()) {
+            Cargo cargo = new Cargo();
+            cargo.setIdCargo(rs.getInt("ID_Cargo"));
+            cargo.setCargoNombre(rs.getString("Cargo"));
+            listaCargos.add(cargo);
+        }
+    } catch (SQLException e) {
+        // Handle SQLException
+    }
+
+    // Convert the list to a JSON array
+    JSONArray jsonArray = new JSONArray();
+    for (Cargo cargo : listaCargos) {
+        JSONObject jsonCargo = new JSONObject();
+        jsonCargo.put("idCargo", cargo.getIdCargo());
+        jsonCargo.put("cargoNombre", cargo.getCargoNombre());
+        jsonArray.put(jsonCargo);
+    }
+
+    // Send the JSON response to the client
+    response.setContentType("application/json");
+    response.setCharacterEncoding("UTF-8");
+    response.getWriter().write(jsonArray.toString());
+}
 
     public void obtenerProductos(HttpServletResponse response) throws IOException {
         ArrayList<Producto> listaProductos = new ArrayList<>();
@@ -228,12 +259,12 @@ public class ServletPrincipal extends HttpServlet {
         response.getWriter().write(jsonArray.toString());
     }
 
-    private ArrayList<EmpleadoModel> mostrarEmpleados(HttpServletRequest request, HttpServletResponse response) {
-        ArrayList<EmpleadoModel> listaEmpleados = new ArrayList<>();
+    private ArrayList<Empleado> mostrarEmpleados(HttpServletRequest request, HttpServletResponse response) {
+        ArrayList<Empleado> listaEmpleados = new ArrayList<>();
         try (Connection connection = Conexion.obtenerConexion(); PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Empleados"); ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
-                EmpleadoModel empleado = new EmpleadoModel();
+                Empleado empleado = new Empleado();
                 empleado.setIdEmpleado(rs.getInt("idEmpleado"));
                 empleado.setDui(rs.getString("DUI"));
                 empleado.setIsss(rs.getInt("ISSS"));
@@ -495,6 +526,152 @@ public class ServletPrincipal extends HttpServlet {
         return listaCompras;
     }
 
+    public ArrayList<Pedido> mostrarPedidos() {
+        ArrayList<Pedido> listaPedidos = new ArrayList<>();
+
+        try (Connection connection = Conexion.obtenerConexion(); PreparedStatement pstmt = connection.prepareStatement(
+                "SELECT p.idPedido, p.Fecha, p.IDProveedor, pr.Nombre AS NombreProveedor, "
+                + "p.Observaciones, p.CostoTotal, p.Estado, p.IDEmpleado, e.Nombres AS NombreEmpleado, p.FechaCreacion, "
+                + "dp.idDetallePedido, dp.idProducto, dp.Cantidad, dp.PrecioUnitario, "
+                + "pr1.Nombre AS NombreProducto, pr1.Descripcion AS DescripcionProducto, pr1.Precio AS PrecioProducto, pr1.Stock AS StockProducto, pr1.IDCategoria AS IDCategoriaProducto, "
+                + "pr1.FechaCreacion AS FechaCreacionProducto, pr1.ImagenURL AS ImagenURLProducto, pr1.FechaModificacion AS FechaModificacionProducto, pr1.Activo AS ActivoProducto "
+                + "FROM Pedidos p "
+                + "JOIN Proveedores pr ON p.IDProveedor = pr.IDProveedor "
+                + "JOIN Empleados e ON p.IDEmpleado = e.IDEmpleado "
+                + "JOIN DetallePedidos dp ON p.idPedido = dp.idPedido "
+                + "JOIN Productos pr1 ON dp.idProducto = pr1.idProducto"
+        ); ResultSet rs = pstmt.executeQuery()) {
+
+            Map<Integer, Pedido> mapaPedidos = new HashMap<>();
+
+            while (rs.next()) {
+                int idPedido = rs.getInt("idPedido");
+                Pedido pedido = mapaPedidos.get(idPedido);
+
+                if (pedido == null) {
+                    pedido = new Pedido();
+                    pedido.setIdPedido(idPedido);
+                    pedido.setFecha(rs.getDate("Fecha"));
+                    pedido.setIDProveedor(rs.getInt("IDProveedor"));
+                    pedido.setNombreProveedor(rs.getString("NombreProveedor"));
+                    pedido.setObservaciones(rs.getString("Observaciones"));
+                    pedido.setCostoTotal(rs.getDouble("CostoTotal"));
+                    pedido.setEstado(rs.getString("Estado"));
+                    pedido.setIDEmpleado(rs.getInt("IDEmpleado"));
+                    pedido.setNombreEmpleado(rs.getString("NombreEmpleado"));
+                    pedido.setFechaCreacion(rs.getDate("FechaCreacion"));
+
+                    mapaPedidos.put(idPedido, pedido);
+                }
+
+                DetallePedido detalle = new DetallePedido();
+                detalle.setIdDetallePedido(rs.getInt("idDetallePedido"));
+                detalle.setIdProducto(rs.getInt("idProducto"));
+                detalle.setCantidad(rs.getInt("Cantidad"));
+                detalle.setPrecioUnitario(rs.getDouble("PrecioUnitario"));
+
+                Producto producto = new Producto();
+                producto.setIdProducto(rs.getInt("idProducto"));
+                producto.setNombre(rs.getString("NombreProducto"));
+                producto.setDescripcion(rs.getString("DescripcionProducto"));
+                producto.setPrecio(rs.getDouble("PrecioProducto"));
+                producto.setStock(rs.getInt("StockProducto"));
+                producto.setIdCategoria(rs.getInt("IDCategoriaProducto"));
+                producto.setFechaCreacion(rs.getDate("FechaCreacionProducto"));
+                producto.setImagenURL(rs.getString("ImagenURLProducto"));
+                producto.setFechaModificacion(rs.getDate("FechaModificacionProducto"));
+                producto.setActivo(rs.getBoolean("ActivoProducto"));
+
+                detalle.setProducto(producto);
+
+                pedido.getDetallePedidos().add(detalle);
+            }
+
+            listaPedidos.addAll(mapaPedidos.values());
+
+        } catch (SQLException e) {
+            // Manejo de excepciones
+        }
+
+        return listaPedidos;
+    }
+
+    public ArrayList<Venta> mostrarVentas() {
+        ArrayList<Venta> listaVentas = new ArrayList<>();
+
+        try (Connection connection = Conexion.obtenerConexion(); PreparedStatement pstmt = connection.prepareStatement(
+                "SELECT v.idVenta, v.idCliente, c.Nombres AS NombreCliente, v.idEmpleado, e.Nombres AS NombreEmpleado, "
+                + "v.FechaCompra, v.MontoCompra, v.FechaCreacion, dv.idDetalleVenta, dv.idProducto, dv.Cantidad, "
+                + "p.Nombre AS NombreProducto, p.Descripcion AS DescripcionProducto, p.Precio AS PrecioProducto, "
+                + "p.Stock AS StockProducto, p.IDCategoria AS IDCategoriaProducto, p.FechaCreacion AS FechaCreacionProducto, "
+                + "p.ImagenURL AS ImagenURLProducto, p.FechaModificacion AS FechaModificacionProducto, p.Activo AS ActivoProducto "
+                + "FROM Ventas v "
+                + "JOIN Clientes c ON v.idCliente = c.idCliente "
+                + "JOIN Empleados e ON v.idEmpleado = e.idEmpleado "
+                + "JOIN DetalleVentas dv ON v.idVenta = dv.idVenta "
+                + "JOIN Productos p ON dv.idProducto = p.idProducto"
+        ); ResultSet rs = pstmt.executeQuery()) {
+
+            Map<Integer, Venta> mapaVentas = new HashMap<>();
+
+            while (rs.next()) {
+                int idVenta = rs.getInt("idVenta");
+                Venta venta = mapaVentas.get(idVenta);
+               
+                if (venta == null) {
+                    venta = new Venta();
+                    venta.setIdVenta(idVenta);
+                    // Create Cliente object and set its properties
+                    Cliente cliente = new Cliente();
+                    cliente.setIdCliente(rs.getInt("idCliente"));
+                    cliente.setNombres(rs.getString("NombreCliente"));
+                    // Set Cliente object in Venta
+                    venta.setCliente(cliente);
+                    // Create Empleado object and set its properties
+                    Empleado empleado = new Empleado();
+                    empleado.setIdEmpleado(rs.getInt("idEmpleado"));
+                    empleado.setNombres(rs.getString("NombreEmpleado"));
+                    // Set Empleado object in Venta
+                    venta.setEmpleado(empleado);
+                    venta.setFechaCompra(rs.getDate("FechaCompra"));
+                    venta.setMontoCompra(rs.getDouble("MontoCompra"));
+                    venta.setFechaCreacion(rs.getDate("FechaCreacion"));
+
+                    mapaVentas.put(idVenta, venta);
+                }
+
+                DetalleVenta detalleVenta = new DetalleVenta();
+                detalleVenta.setIdDetalleVenta(rs.getInt("idDetalleVenta"));
+                
+                
+                detalleVenta.setCantidad(rs.getInt("Cantidad"));
+
+                Producto producto = new Producto();
+                producto.setIdProducto(rs.getInt("idProducto"));
+                producto.setNombre(rs.getString("NombreProducto"));
+                producto.setDescripcion(rs.getString("DescripcionProducto"));
+                producto.setPrecio(rs.getDouble("PrecioProducto"));
+                producto.setStock(rs.getInt("StockProducto"));
+                producto.setIdCategoria(rs.getInt("IDCategoriaProducto"));
+                producto.setFechaCreacion(rs.getDate("FechaCreacionProducto"));
+                producto.setImagenURL(rs.getString("ImagenURLProducto"));
+                producto.setFechaModificacion(rs.getDate("FechaModificacionProducto"));
+                producto.setActivo(rs.getBoolean("ActivoProducto"));
+
+                detalleVenta.setProducto(producto);
+
+                venta.getDetalleVentas().add(detalleVenta);
+            }
+
+            listaVentas.addAll(mapaVentas.values());
+
+        } catch (SQLException e) {
+           e.printStackTrace();
+        }
+
+        return listaVentas;
+    }
+
     public ArrayList<Compra> mostrarComprasPorId(HttpServletRequest request) {
         int idCompra = Integer.parseInt(request.getParameter("idCompra"));
         ArrayList<Compra> listaCompras = new ArrayList<>();
@@ -649,6 +826,16 @@ public class ServletPrincipal extends HttpServlet {
                     request.setAttribute("comprasList", mostrarCompras());
                     request.getRequestDispatcher("/GestionarCompras.jsp").forward(request, response);
                 }
+                case "GestionarPedidos" -> {
+                    request.setAttribute("pedidosList", mostrarPedidos());
+                    request.getRequestDispatcher("/GestionarPedidos.jsp").forward(request, response);
+                }
+                 case "GestionarVentas" -> {
+                    request.setAttribute("ventasList", mostrarVentas());
+                     System.out.println("HHolaaa" + mostrarCompras());
+                     System.out.println("HHolaaa" + mostrarVentas());
+                    request.getRequestDispatcher("/GestionarVentas.jsp").forward(request, response);
+                }
                 case "AgregarCompra" -> {
 
                     request.getRequestDispatcher("opcionesUsuario/AgregarCompra.jsp").forward(request, response);
@@ -659,6 +846,10 @@ public class ServletPrincipal extends HttpServlet {
                 }
                 case "ObtenerProveedores" -> {
                     obtenerProveedores(response);
+
+                }
+                case "ObtenerCargos" -> {
+                    obtenerCargos(response);
 
                 }
                 case "ObtenerProductos" -> {

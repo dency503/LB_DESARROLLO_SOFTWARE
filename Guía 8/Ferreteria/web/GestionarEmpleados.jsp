@@ -5,18 +5,83 @@
         <meta charset="UTF-8">
         <title>Gestionar Empleados</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-        <style>
-            .table th, .table td {
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+           <style>
+            body {
+                background-color: #f8f9fa;
+            }
+
+            .container {
+                background-color: #ffffff;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                padding: 20px;
+                margin-top: 50px;
+            }
+
+            h1 {
+                color: #343a40;
+            }
+
+            table {
+                width: 100%;
+                margin-top: 20px;
+            }
+
+            th, td {
+                padding: 10px;
                 text-align: center;
+            }
+
+            .btn-primary,
+            .btn-danger {
+                margin-right: 5px;
+            }
+
+            .btn {
+                font-size: 14px;
+            }
+
+            .btn i {
+                margin-right: 5px;
+            }
+
+            .btn-primary {
+                background-color: #007bff;
+                border-color: #007bff;
+            }
+
+            .btn-danger {
+                background-color: #dc3545;
+                border-color: #dc3545;
+            }
+
+            .btn-primary:hover,
+            .btn-primary:focus {
+                background-color: #0056b3;
+                border-color: #0056b3;
+            }
+
+            .btn-danger:hover,
+            .btn-danger:focus {
+                background-color: #c82333;
+                border-color: #bd2130;
+            }
+
+            .btn-primary i,
+            .btn-danger i {
+                color: #ffffff;
             }
         </style>
     </head>
     <body>
         <div class="container mt-5">
-            <h1 class="mb-4">Listado de Empleados</h1>
+            <h1 class="mb-4"><i class="fas fa-users"></i> Gestionar de Empleados</h1>
+
             <button class="btn btn-primary">
-    <a href="/Ferreteria?accion=AgregarEmpleado" style="color: white; text-decoration: none;">Agregar Empleado</a>
-</button>
+                <a href="/Ferreteria/opcionesUsuario/AgregarEmpleado.jsp" style="color: white; text-decoration: none;"><i class="fas fa-user-plus"></i> Agregar Empleado</a>
+            </button>
+
             <table class="table table-bordered table-striped">
                 <thead class="table-dark">
                     <tr>
