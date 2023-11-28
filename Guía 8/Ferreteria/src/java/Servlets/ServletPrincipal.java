@@ -81,6 +81,7 @@ public class ServletPrincipal extends HttpServlet {
         }
         return listaClientes;
     }
+   
 
     public ArrayList<Categoria> mostrarCategorias() {
         ArrayList<Categoria> listaCategorias = new ArrayList<>();
@@ -144,6 +145,39 @@ public class ServletPrincipal extends HttpServlet {
         }
 
         // Send the JSON response to the client
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(jsonArray.toString());
+    }
+    public void obtenerCategorias(HttpServletResponse response) throws IOException {
+        ArrayList<Categoria> listaCategorias = new ArrayList<>();
+
+        try (Connection connection = Conexion.obtenerConexion();
+             PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Categorias");
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                Categoria categoria = new Categoria();
+                categoria.setIdCategoria(rs.getInt("idCategoria"));
+                categoria.setNombre(rs.getString("nombre"));
+                categoria.setDescripcion(rs.getString("descripcion"));
+                listaCategorias.add(categoria);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Convertir la lista a un array JSON
+        JSONArray jsonArray = new JSONArray();
+        for (Categoria categoria : listaCategorias) {
+            JSONObject jsonCategoria = new JSONObject();
+            jsonCategoria.put("idCategoria", categoria.getIdCategoria());
+            jsonCategoria.put("nombre", categoria.getNombre());
+            jsonCategoria.put("descripcion", categoria.getDescripcion());
+            jsonArray.put(jsonCategoria);
+        }
+
+        // Enviar la respuesta JSON al cliente
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(jsonArray.toString());
@@ -261,9 +295,13 @@ public void obtenerCargos(HttpServletResponse response) throws IOException {
 
     private ArrayList<Empleado> mostrarEmpleados(HttpServletRequest request, HttpServletResponse response) {
         ArrayList<Empleado> listaEmpleados = new ArrayList<>();
-        try (Connection connection = Conexion.obtenerConexion(); PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Empleados"); ResultSet rs = pstmt.executeQuery()) {
-
-            while (rs.next()) {
+         try (Connection connection = Conexion.obtenerConexion(); 
+         PreparedStatement pstmt = connection.prepareStatement("SELECT e.*, c.Cargo as NombreCargo " +
+                                                               "FROM Empleados e " +
+                                                               "JOIN Cargos c ON e.ID_Cargo = c.ID_Cargo " +
+                                                               "JOIN Direcciones d ON e.ID_Direccion = d.ID_Direccion");
+         ResultSet rs = pstmt.executeQuery()) {                      
+             while (rs.next()) {
                 Empleado empleado = new Empleado();
                 empleado.setIdEmpleado(rs.getInt("idEmpleado"));
                 empleado.setDui(rs.getString("DUI"));
@@ -275,6 +313,7 @@ public void obtenerCargos(HttpServletResponse response) throws IOException {
                 empleado.setCorreo(rs.getString("Correo"));
                 empleado.setIdCargo(rs.getInt("ID_Cargo"));
                 empleado.setIdDireccion(rs.getInt("ID_Direccion"));
+                empleado.setNombreCargo(rs.getString("NombreCargo"));
                 listaEmpleados.add(empleado);
             }
         } catch (SQLException e) {
@@ -366,6 +405,7 @@ public void obtenerCargos(HttpServletResponse response) throws IOException {
             System.out.println("Error al guardar la compra: " + e.getMessage());
         }
     }
+    
 
     public void modificarCompra(HttpServletRequest request, HttpServletResponse response) throws IOException {
         int idCompra = Integer.parseInt(request.getParameter("idCompra")); // Assuming you have a parameter for the ID of the purchase to modify
@@ -747,30 +787,36 @@ public void obtenerCargos(HttpServletResponse response) throws IOException {
     }
 
     public ArrayList<Producto> mostrarProductos() {
-        ArrayList<Producto> listaProductos = new ArrayList<>();
+    ArrayList<Producto> listaProductos = new ArrayList<>();
 
-        try (Connection connection = Conexion.obtenerConexion(); PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Productos"); ResultSet rs = pstmt.executeQuery()) {
+    try (Connection connection = Conexion.obtenerConexion(); 
+         PreparedStatement pstmt = connection.prepareStatement("SELECT P.*, C.Nombre AS CategoriaNombre FROM Productos P INNER JOIN Categorias C ON P.IdCategoria = C.IdCategoria");
+         ResultSet rs = pstmt.executeQuery()) {
 
-            while (rs.next()) {
-                Producto producto = new Producto();
-                producto.setIdProducto(rs.getInt("idProducto"));
-                producto.setNombre(rs.getString("Nombre"));
-                producto.setDescripcion(rs.getString("Descripcion"));
-                producto.setPrecio(rs.getDouble("Precio"));
-                producto.setStock(rs.getInt("Stock"));
-                producto.setIdCategoria(rs.getInt("IdCategoria"));
-                producto.setFechaCreacion(rs.getDate("FechaCreacion"));
-                producto.setImagenURL(rs.getString("ImagenURL"));
-                producto.setFechaModificacion(rs.getDate("FechaModificacion"));
-                producto.setActivo(rs.getBoolean("Activo"));
+        while (rs.next()) {
+            Producto producto = new Producto();
+            producto.setIdProducto(rs.getInt("idProducto"));
+            producto.setNombre(rs.getString("Nombre"));
+            producto.setDescripcion(rs.getString("Descripcion"));
+            producto.setPrecio(rs.getDouble("Precio"));
+            producto.setStock(rs.getInt("Stock"));
+            producto.setIdCategoria(rs.getInt("IdCategoria"));
+            producto.setFechaCreacion(rs.getDate("FechaCreacion"));
+            producto.setImagenURL(rs.getString("ImagenURL"));
+            producto.setFechaModificacion(rs.getDate("FechaModificacion"));
+            producto.setActivo(rs.getBoolean("Activo"));
+            producto.setCategoriaNombre(rs.getString("CategoriaNombre")); // Nuevo campo
 
-                listaProductos.add(producto);
-            }
-        } catch (SQLException e) {
-
+            listaProductos.add(producto);
         }
-        return listaProductos;
+    } catch (SQLException e) {
+        // Manejar la excepción, por ejemplo, imprimir un mensaje de error
+        e.printStackTrace();
     }
+
+    return listaProductos;
+}
+
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
@@ -836,6 +882,11 @@ public void obtenerCargos(HttpServletResponse response) throws IOException {
                      System.out.println("HHolaaa" + mostrarVentas());
                     request.getRequestDispatcher("/GestionarVentas.jsp").forward(request, response);
                 }
+                 case "GestionarProveedores" -> {
+                    request.setAttribute("proveedoresList", mostrarProveedores());
+                    
+                    request.getRequestDispatcher("/GestionarProveedores.jsp").forward(request, response);
+                }
                 case "AgregarCompra" -> {
 
                     request.getRequestDispatcher("opcionesUsuario/AgregarCompra.jsp").forward(request, response);
@@ -854,6 +905,10 @@ public void obtenerCargos(HttpServletResponse response) throws IOException {
                 }
                 case "ObtenerProductos" -> {
                     obtenerProductos(response);
+
+                }
+                 case "ObtenerCategoria" -> {
+                    obtenerCategorias(response);
 
                 }
                 case "MostrarComprasPorId" -> {
@@ -925,7 +980,7 @@ public void obtenerCargos(HttpServletResponse response) throws IOException {
             }
             case "AgregarCategoria" -> {
                 agregarCategoria(request, response);
-                response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarCategoria");
+                response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarCategorias");
             }
             case "ModificarCategoria" -> {
                 modificarCategoria(request, response);
@@ -1333,5 +1388,7 @@ public void obtenerCargos(HttpServletResponse response) throws IOException {
             }
         }
     }
+
+   
 
 }

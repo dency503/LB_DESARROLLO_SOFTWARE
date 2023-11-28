@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/Ferreteria/css/style.css">
     <title>Agregar Producto | Ferreteria</title>
 </head>
 <body>
@@ -36,8 +37,10 @@
 
             <div class="mb-3">
                 <label for="idCategoria" class="form-label">ID de Categoría</label>
-                <input type="text" class="form-control" id="idCategoria" name="idCategoria" required>
+                <select  class="form-control" id="idCategoria" name="idCategoria" required></select>
             </div>
+            
+           
 
             <div class="mb-3">
                 <label for="fechaCreacion" class="form-label">Fecha de Creación</label>
@@ -70,6 +73,33 @@
     </div>
 
     <!-- Include your Bootstrap JS link and any other necessary scripts -->
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+     <script>
+            function categoriaOptions(elementId, data) {
+                // Lógica para llenar las opciones de un elemento de selección
+                var selectElement = $("#" + elementId);
+                selectElement.empty();
+                selectElement.append('<option value="">Seleccione una opción</option>');
+
+                // Llenar opciones desde los datos proporcionados
+                $.each(data, function (index, item) {
+                    selectElement.append('<option value="' + item.idCategoria + '">' + item.nombre + '</option>');
+                });
+            }
+
+            function fetchEmployeeAndSupplierData() {
+                // Lógica para obtener datos de empleados y proveedores mediante AJAX
+                $.getJSON('/Ferreteria?accion=ObtenerCategoria', function (supplierData) {
+                    categoriaOptions('idCategoria', supplierData);
+                });
+            }
+
+            $(document).ready(function () {
+                fetchEmployeeAndSupplierData();
+
+
+            });
+        </script>
 </body>
 </html>

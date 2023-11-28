@@ -124,9 +124,10 @@
                 <div class="form-group">
                     <label for="idCargo">ID Cargo:</label>
                     <select class="form-control" id="cargo" name="cargo" required>
-                       
+                        
                     </select>
                 </div>
+
 
                 <div class="form-group">
                     <label for="idDireccion">ID Dirección:</label>
@@ -141,32 +142,32 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-       <script>
-    function cargoOptions(elementId, data) {
-        // Lógica para llenar las opciones de un elemento de selección
-        var selectElement = $("#" + elementId);
-        selectElement.empty();
-        selectElement.append('<option value="">Seleccione una opción</option>');
+        <script>
+            function cargoOptions(elementId, data) {
+                // Lógica para llenar las opciones de un elemento de selección
+                var selectElement = $("#" + elementId);
+                selectElement.empty();
+                selectElement.append('<option value="">Seleccione una opción</option>');
 
-        // Llenar opciones desde los datos proporcionados
-        $.each(data, function (index, item) {
-            selectElement.append('<option value="' + item.idCargo + '">' + item.cargoNombre + '</option>');
-        });
-    }
-
-    function fetchEmployeeAndSupplierData() {
-        // Lógica para obtener datos de empleados y proveedores mediante AJAX
-        $.getJSON('/Ferreteria?accion=ObtenerCargos', function (supplierData) {
-            cargoOptions('cargo', supplierData);
-        });
-    }
-    
-      $(document).ready(function () {
-                    fetchEmployeeAndSupplierData();
-                    
-
+                // Llenar opciones desde los datos proporcionados
+                $.each(data, function (index, item) {
+                    selectElement.append('<option value="' + item.idCargo + '">' + item.cargoNombre + '</option>');
                 });
-</script>
+            }
+
+            function fetchEmployeeAndSupplierData() {
+                // Lógica para obtener datos de empleados y proveedores mediante AJAX
+                $.getJSON('/Ferreteria?accion=ObtenerCargos', function (supplierData) {
+                    cargoOptions('cargo', supplierData);
+                });
+            }
+
+            $(document).ready(function () {
+                fetchEmployeeAndSupplierData();
+
+
+            });
+        </script>
 
 
     </body>

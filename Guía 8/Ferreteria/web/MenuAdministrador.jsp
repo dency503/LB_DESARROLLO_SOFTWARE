@@ -28,7 +28,7 @@
                     <a class="nav-link" href="/Ferreteria?accion=GestionarClientes"><i class="fas fa-users"></i> Gestionar de Cliente</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/Ferreteria?accion=RegistrarProveedores"><i class="fas fa-truck"></i> Registro de Proveedores</a>
+                    <a class="nav-link" href="/Ferreteria?accion=GestionarProveedores"><i class="fas fa-truck"></i> Gestionar  Proveedores</a>
                 </li>
                 <!-- Agrega más enlaces según sea necesario -->
             </ul>

@@ -6,6 +6,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <title>Gestionar Productos | Ferreteria</title>
+    <link rel="stylesheet" href="/Ferreteria/css/style.css">
 </head>
 <body>
     <div class="container mt-5">
@@ -21,6 +22,7 @@
                     <th>ID</th>
                     <th>Nombre</th>
                     <th>Descripción</th>
+                    <th>Categoria</th>
                     <th>Precio</th>
                     <th>Stock</th>
                     <th>Acciones</th>
@@ -32,6 +34,7 @@
                         <td><c:out value="${producto.idProducto}" /></td>
                         <td><c:out value="${producto.nombre}" /></td>
                         <td><c:out value="${producto.descripcion}" /></td>
+                        <td><c:out value="${producto.categoriaNombre}" /></td>
                         <td><c:out value="${producto.precio}" /></td>
                         <td><c:out value="${producto.stock}" /></td>
                         <td>
@@ -41,6 +44,7 @@
                                 <input type="hidden" name="descripcion" value="${producto.descripcion}" />
                                 <input type="hidden" name="precio" value="${producto.precio}" />
                                 <input type="hidden" name="stock" value="${producto.stock}" />
+                                <input type="hidden" name="idCategoria" value="${producto.idCategoria}" />
                                 <!-- Add any other product-related data -->
                                 <button type="submit" class="btn btn-primary btn-sm">
                                     <i class="fas fa-pencil-alt"></i> Modificar

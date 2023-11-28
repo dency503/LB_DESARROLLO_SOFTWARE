@@ -6,13 +6,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <title>Gestionar Categorias | Ferreteria</title>
+    <link rel="stylesheet" href="/Ferreteria/css/style.css">
 </head>
 <body>
     <div class="container mt-5">
         <h1 class="mb-4">Gestionar Categorías</h1>
         
-        <a href="/Ferreteria?accion=AgregarCategoria" class="btn btn-primary mb-3">
-            <i class="fas fa-plus"></i> Agregar Categoria
+        <a href="/Ferreteria/opcionesUsuario/AgregarCategoria.jsp" class="btn btn-primary mb-3">
+            <i class="fas fa-plus"></i> Agregar Categoriaw
         </a>
 
         <table class="table table-bordered table-striped">

@@ -125,7 +125,7 @@
                             <td>
 
 
-                                <a href="/Ferreteria/ServletPrincipal?accion=MostrarComprasPorId&idCompra=${compra.idCompra}" class="btn btn-primary btn-sm">
+                                <a href="/Ferreteria/ServletPrincipal?accion=MostrarComprasPorId&idCompra=${compra.idCompra}" class="btn btn-warning">
                                     <i class="fas fa-pencil-alt"></i> Modificar
                                 </a>
 
@@ -133,13 +133,13 @@
                                 <!-- Eliminación de Compra -->
                                 <form method="post" action="opcionesUsuario/EliminarCompra.jsp">
                                     <input type="hidden" name="idCompra" value="${compra.idCompra}" />
-                                    <input type="hidden" name="idProveedor" value="${compra.idProveedor}" />
-                                    <input type="hidden" name="idEmpleado" value="${compra.idEmpleado}" />
+                                    <input type="hidden" name="nombreProveedor" value="${compra.nombreProveedor}" />
+                                    <input type="hidden" name="nombreEmpleado" value="${compra.nombreEmpleado}" />
                                     <input type="hidden" name="fechaCompra" value="${compra.fechaCompra}" />
                                     <input type="hidden" name="montoCompra" value="${compra.montoCompra}" />
                                     <!-- Agrega más atributos según sea necesario -->
 
-                                    <button type="submit" class="btn btn-danger btn-sm">
+                                    <button type="submit" class="btn btn-danger">
                                         <i class="fas fa-trash-alt"></i> Eliminar
                                     </button>
                                 </form>

@@ -136,19 +136,21 @@
 
                                     <button type="submit" class="btn btn-danger btn-sm">
                                         <i class="fas fa-trash-alt"></i> Eliminar
-                                    </button><td
+                                    </button></form><td>
                             <!-- Puedes agregar más columnas según tus necesidades -->
                         </tr>
                     </c:forEach>
                 </tbody>
+                <button class="btn btn-primary" onclick="regresar()">Regresar</button>
             </table>
+             <button class="btn btn-primary" onclick="regresar()">
+            <i class="fas fa-arrow-left"></i> Regresar
+        </button>
         </div>
 
         <!-- Agrega tus scripts personalizados aquí -->
 
-        <button class="btn btn-primary" onclick="regresar()">
-            <i class="fas fa-arrow-left"></i> Regresar
-        </button>
+       
         <script>
             function regresar() {
                 window.history.back();

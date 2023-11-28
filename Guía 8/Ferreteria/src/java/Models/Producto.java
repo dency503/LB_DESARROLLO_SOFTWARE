@@ -19,6 +19,7 @@ public class Producto {
     private String imagenURL;
     private Date fechaModificacion;
     private boolean activo;
+    private String categoriaNombre;
 
     // Constructor, getters y setters
 
