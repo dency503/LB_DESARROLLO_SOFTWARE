@@ -22,7 +22,7 @@
                 <p><strong>Monto de Compra:</strong> ${param.montoCompra}</p>
                 <!-- Add more details as needed -->
 
-                <form method="post" action="/Ferreteria/ServletPrincipal?accion=EliminarCompra">
+                <form method="post" action="/Ferreteria/?accion=EliminarCompra">
                     <input type="hidden" name="idCompra" value="${param.idCompra}" />
                     <!-- Add more hidden input fields as needed -->
 

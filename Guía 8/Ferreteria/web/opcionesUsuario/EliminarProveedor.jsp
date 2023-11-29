@@ -8,7 +8,7 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
+    <link rel="stylesheet" href="/Ferreteria/css/style.css">
     <!-- Font Awesome CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
 </head>
@@ -17,7 +17,7 @@
 <div class="container mt-5">
     <h2>Eliminar Proveedor</h2>
 
-    <form method="post" action="ProcesarEliminacionProveedor.jsp">
+    <form method="post" action="/Ferreteria/?accion=EliminarProveedor">
         <!-- Retrieve parameters from the POST request -->
         <input type="hidden" name="idProveedor" value="${param.idProveedor}" />
         <input type="hidden" name="nombre" value="${param.nombre}" />

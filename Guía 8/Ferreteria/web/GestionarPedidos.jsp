@@ -77,7 +77,7 @@
     <body>
         <div class="container">
             <h1>Gestionar Pedidos</h1>
-            <a href="/Ferreteria?accion=AgregarCompra" class="btn btn-primary mb-3">
+            <a href="/Ferreteria/opcionesUsuario/AgregarPedido.jsp" class="btn btn-primary mb-3">
                 <i class="fas fa-plus"></i> Agregar Compra
             </a>
 
@@ -120,13 +120,13 @@
                                         </c:forEach>
                                     </ul>
                                 </div></td>
-                                <td><a href="/Ferreteria/ServletPrincipal?accion=MostrarComprasPorId&idCompra=${compra.idCompra}" class="btn btn-primary btn-sm">
+                                <td><a href="/Ferreteria/ServletPrincipal?accion=MostrarComprasPorId&idCompra=${pedido.idPedido}" class="btn btn-primary btn-sm">
                                     <i class="fas fa-pencil-alt"></i> Modificar
                                 </a>
 
 
                                 <!-- Eliminación de Compra -->
-                                <form method="post" action="opcionesUsuario/EliminarCompra.jsp">
+                                <form method="post" action="opcionesUsuario/EliminarPedido.jsp">
                                     <input type="hidden" name="idCompra" value="${compra.idCompra}" />
                                     <input type="hidden" name="idProveedor" value="${compra.idProveedor}" />
                                     <input type="hidden" name="idEmpleado" value="${compra.idEmpleado}" />

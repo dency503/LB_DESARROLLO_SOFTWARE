@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Agregar Proveedor</title>
-
+    <link rel="stylesheet" href="/Ferreteria/css/style.css">
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
@@ -17,7 +17,7 @@
 <div class="container mt-5">
     <h2>Agregar Proveedor</h2>
 
-    <form method="post" action="ProcesarAgregarProveedor.jsp">
+    <form method="post" action="/Ferreteria/?accion=AgregarProveedor">
         <!-- Input fields for adding a new provider -->
         <div class="form-group">
             <label for="inputNombre">Nombre:</label>
@@ -32,7 +32,7 @@
         <!-- Add more input fields for other attributes as needed -->
 
         <button type="submit" class="btn btn-primary">Agregar Proveedor</button>
-        <a href="GestionarProveedor.jsp" class="btn btn-secondary">Cancelar</a>
+        
     </form>
 </div>
 

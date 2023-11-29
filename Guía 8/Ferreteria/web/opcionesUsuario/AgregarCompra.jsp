@@ -10,54 +10,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 
-        <style>
-            body {
-                background-color: #f8f9fa;
-            }
-
-            .container {
-                background-color: #ffffff;
-                border-radius: 8px;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                padding: 20px;
-                margin-top: 50px;
-            }
-
-            h1 {
-                color: #343a40;
-            }
-
-            form {
-                margin-top: 20px;
-            }
-
-            .btn-primary {
-                margin-right: 5px;
-            }
-
-            .btn {
-                font-size: 14px;
-            }
-
-            .btn i {
-                margin-right: 5px;
-            }
-
-            .btn-primary {
-                background-color: #007bff;
-                border-color: #007bff;
-            }
-
-            .btn-primary:hover,
-            .btn-primary:focus {
-                background-color: #0056b3;
-                border-color: #0056b3;
-            }
-
-            .btn-primary i {
-                color: #ffffff;
-            }
-        </style>
+           <link rel="stylesheet" href="/Ferreteria/css/style.css">
     </head>
     <body>
         <div class="container">

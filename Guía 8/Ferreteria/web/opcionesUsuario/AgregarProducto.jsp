@@ -13,7 +13,7 @@
     <div class="container mt-5">
         <h1>Agregar Producto</h1>
         
-        <form method="post" action="/Ferreteria/AgregarProductoServlet">
+        <form method="post" action="/Ferreteria/?accion=AgregarProducto">
             
             <div class="mb-3">
                 <label for="nombre" class="form-label">Nombre del Producto</label>

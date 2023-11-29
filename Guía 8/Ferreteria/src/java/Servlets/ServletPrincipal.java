@@ -498,7 +498,25 @@ public void obtenerCargos(HttpServletResponse response) throws IOException {
             e.printStackTrace();
         }
     }
+public ArrayList<Proveedor> mostrarProveedores() {
+        ArrayList<Proveedor> listaProveedores = new ArrayList<>();
 
+        try (Connection connection = Conexion.obtenerConexion(); PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Proveedores"); ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                Proveedor proveedor = new Proveedor();
+                proveedor.setIdProveedor(rs.getInt("idProveedor"));
+                proveedor.setTelefono(rs.getString("telefono"));
+                proveedor.setIdDireccion(rs.getInt("idDireccion"));
+                proveedor.setNombre(rs.getString("nombre"));
+                listaProveedores.add(proveedor);
+            }
+        } catch (SQLException e) {
+            // Handle the SQLException here, for example, log the error or throw a custom exception.
+            // This is just an example. In a production environment, you should handle the exception properly.
+        }
+        return listaProveedores;
+    }
     public ArrayList<Compra> mostrarCompras() {
         ArrayList<Compra> listaCompras = new ArrayList<>();
 
@@ -981,6 +999,17 @@ public void obtenerCargos(HttpServletResponse response) throws IOException {
             case "AgregarCategoria" -> {
                 agregarCategoria(request, response);
                 response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarCategorias");
+            }case "AgregarProveedor" -> {
+               agregarProveedor(request);
+                response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarProveedores");
+            }
+            case "ModificarProveedor" -> {
+                modificarProveedor(request);
+                response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarProveedores");
+            }
+             case "EliminarProveedor" -> {
+                eliminarProveedor(request);
+                response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarProveedores");
             }
             case "ModificarCategoria" -> {
                 modificarCategoria(request, response);
@@ -996,6 +1025,9 @@ public void obtenerCargos(HttpServletResponse response) throws IOException {
             }
             case "ModificarCompra" -> {
                 modificarCompra(request, response);
+                response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarCompras");
+            } case "EliminarCompra" -> {
+                eliminarCompra(request, response);
                 response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarCompras");
             }
             default -> {
@@ -1014,6 +1046,52 @@ public void obtenerCargos(HttpServletResponse response) throws IOException {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+public void agregarPedido() {
+    try (Connection connection = Conexion.obtenerConexion(); PreparedStatement pstmt = connection.prepareStatement(
+            "INSERT INTO Pedidos (Fecha, IDProveedor, Observaciones, CostoTotal, Estado, IDEmpleado, FechaCreacion) "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
+Pedido nuevoPedido = new Pedido();
+        pstmt.setDate(1, new java.sql.Date(nuevoPedido.getFecha().getTime()));
+        pstmt.setInt(2, nuevoPedido.getIDProveedor());
+        pstmt.setString(3, nuevoPedido.getObservaciones());
+        pstmt.setDouble(4, nuevoPedido.getCostoTotal());
+        pstmt.setString(5, nuevoPedido.getEstado());
+        pstmt.setInt(6, nuevoPedido.getIDEmpleado());
+        pstmt.setDate(7, new java.sql.Date(nuevoPedido.getFechaCreacion().getTime()));
+
+        int affectedRows = pstmt.executeUpdate();
+
+        if (affectedRows > 0) {
+            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    int idPedidoGenerado = generatedKeys.getInt(1);
+
+                    // Ahora, inserta los detalles del pedido
+                    for (DetallePedido detalle : nuevoPedido.getDetallePedidos()) {
+                        try (PreparedStatement pstmtDetalle = connection.prepareStatement(
+                                "INSERT INTO DetallePedidos (idPedido, idProducto, Cantidad, PrecioUnitario) "
+                                + "VALUES (?, ?, ?, ?)")) {
+
+                            pstmtDetalle.setInt(1, idPedidoGenerado);
+                            pstmtDetalle.setInt(2, detalle.getIdProducto());
+                            pstmtDetalle.setInt(3, detalle.getCantidad());
+                            pstmtDetalle.setDouble(4, detalle.getPrecioUnitario());
+
+                            pstmtDetalle.executeUpdate();
+                        }
+                    }
+                } else {
+                    // No se generó la clave, manejar el error
+                }
+            }
+        } else {
+            // No se insertó ninguna fila, manejar el error
+        }
+
+    } catch (SQLException e) {
+        // Manejo de excepciones
+    }
+}
 
     private void agregarCategoria(HttpServletRequest request, HttpServletResponse response) {
         String nombre = request.getParameter("nombre");
@@ -1388,7 +1466,81 @@ public void obtenerCargos(HttpServletResponse response) throws IOException {
             }
         }
     }
+  private void agregarProveedor(HttpServletRequest request) throws ServletException, IOException {
+        // Retrieve new provider information from the request parameters
+        String nombre = request.getParameter("nombre");
+        String telefono = request.getParameter("telefono");
+        // Add more parameters as needed
 
-   
+        // Validate input if needed
 
+        try (Connection connection = Conexion.obtenerConexion();
+             PreparedStatement pstmt = connection.prepareStatement("INSERT INTO Proveedores (nombre, telefono) VALUES (?, ?)")) {
+
+            pstmt.setString(1, nombre);
+            pstmt.setString(2, telefono);
+
+            // Set more parameters if needed
+
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            // Handle the SQLException here, for example, log the error or throw a custom exception.
+            // This is just an example. In a production environment, you should handle the exception properly.
+            e.printStackTrace();
+        }
+
+        // Redirect to the page displaying the updated list of providers
+       
+    }
+    private void modificarProveedor(HttpServletRequest request) throws ServletException, IOException {
+        // Retrieve modified provider information from the request parameters
+        int idProveedor = Integer.parseInt(request.getParameter("idProveedor"));
+        String nuevoNombre = request.getParameter("nombre");
+        String nuevoTelefono = request.getParameter("telefono");
+        // Add more parameters as needed
+
+        // Validate input if needed
+
+        try (Connection connection = Conexion.obtenerConexion();
+             PreparedStatement pstmt = connection.prepareStatement("UPDATE Proveedores SET nombre = ?, telefono = ? WHERE idProveedor = ?")) {
+
+            pstmt.setString(1, nuevoNombre);
+            pstmt.setString(2, nuevoTelefono);
+            pstmt.setInt(3, idProveedor);
+
+            // Set more parameters if needed
+
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            // Handle the SQLException here, for example, log the error or throw a custom exception.
+            // This is just an example. In a production environment, you should handle the exception properly.
+            e.printStackTrace();
+        }
+
+        // Redirect to the page displaying the updated list of providers
+       
+    }
+private void eliminarProveedor(HttpServletRequest request) throws ServletException, IOException {
+        // Retrieve the provider ID to be deleted from the request
+        int idProveedor = Integer.parseInt(request.getParameter("idProveedor"));
+
+        // Implement the logic to delete the provider with the given ID
+        try (Connection connection = Conexion.obtenerConexion();
+             PreparedStatement pstmt = connection.prepareStatement("DELETE FROM Proveedores WHERE idProveedor = ?")) {
+
+            pstmt.setInt(1, idProveedor);
+
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            // Handle the SQLException here, for example, log the error or throw a custom exception.
+            // This is just an example. In a production environment, you should handle the exception properly.
+            e.printStackTrace();
+        }
+
+        // Redirect to the page displaying the updated list of providers
+        
+    }
 }
