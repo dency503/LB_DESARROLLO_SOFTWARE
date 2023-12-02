@@ -103,7 +103,186 @@ public class ServletPrincipal extends HttpServlet {
         return listaCategorias;
 
     }
+public List<DetalleCompra> mostrarDetalleCompra(HttpServletResponse response) {
+    List<DetalleCompra> detalleCompraList = new ArrayList<>();
 
+    try (Connection connection = Conexion.obtenerConexion();
+         PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM DetalleCompras");
+         ResultSet rs = pstmt.executeQuery()
+    ) {
+        while (rs.next()) {
+            DetalleCompra detalleCompra = new DetalleCompra();
+            detalleCompra.setIdDetalleCompra(rs.getInt("idDetalleCompra"));
+            detalleCompra.setIdCompra(rs.getInt("idCompra"));
+            detalleCompra.setIdProducto(rs.getInt("idProducto"));
+            detalleCompra.setCantidad(rs.getInt("cantidad"));
+            detalleCompra.setPrecioUnitario(rs.getDouble("precioUnitario"));
+
+            // Assuming you have a Producto class
+            Producto producto = new Producto();
+            producto.setIdProducto(rs.getInt("idProducto"));
+            // Set other properties of Producto if needed
+            detalleCompra.setProducto(producto);
+
+            detalleCompraList.add(detalleCompra);
+        }
+    } catch (SQLException e) {
+        // Handle the SQLException appropriately, e.g., log the error or throw a custom exception.
+        e.printStackTrace(); // For demonstration purposes. In production, consider logging.
+    }
+
+    return detalleCompraList;
+}
+
+public void agregarDetallePedido(HttpServletRequest request) {
+    int idProducto = Integer.parseInt(request.getParameter("idProducto"));
+    int cantidad = Integer.parseInt(request.getParameter("cantidad"));
+    double precioUnitario = Double.parseDouble(request.getParameter("precioUnitario"));
+
+    try (Connection connection = Conexion.obtenerConexion();
+         PreparedStatement pstmt = connection.prepareStatement("INSERT INTO DetallePedidos (idProducto, cantidad, precioUnitario) VALUES (?, ?, ?)")) {
+
+        pstmt.setInt(1, idProducto);  // Corrected variable name
+        pstmt.setInt(2, cantidad);
+        pstmt.setDouble(3, precioUnitario);
+
+        pstmt.executeUpdate();
+    } catch (SQLException e) {
+        e.printStackTrace(); // Handle the exception appropriately, e.g., log the error or throw a custom exception.
+    }
+}
+
+public List<DetallePedido> mostrarDetallePedido() {
+    List<DetallePedido> detallesPedido = new ArrayList<>();
+
+    try (Connection connection = Conexion.obtenerConexion();
+         PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM DetallePedidos d  JOIN Productos p ON d.idProducto = p.idProducto ");
+         ResultSet rs = pstmt.executeQuery()) {
+
+        while (rs.next()) {
+            DetallePedido detallePedido = new DetallePedido();
+            detallePedido.setIdDetallePedido(rs.getInt("idDetallePedido"));
+            detallePedido.setIdProducto(rs.getInt("idProducto"));
+            detallePedido.setCantidad(rs.getInt("cantidad"));
+            detallePedido.setPrecioUnitario(rs.getDouble("precioUnitario"));
+
+            // Assuming you have a Producto class
+            Producto producto = new Producto();
+            producto.setIdProducto(rs.getInt("idProducto"));
+             producto.setNombre(rs.getString("Nombre"));
+            // Set other properties of Producto if needed
+            detallePedido.setProducto(producto);
+
+            detallesPedido.add(detallePedido);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace(); // Handle the exception appropriately, e.g., log the error or throw a custom exception.
+    }
+
+    return detallesPedido;
+}
+
+private List<DetalleVenta> mostrarDetallesVenta() {
+    List<DetalleVenta> detallesVenta = new ArrayList<>();
+
+    try (Connection connection = Conexion.obtenerConexion();
+         PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM DetalleVentas d "+ " JOIN Productos p on d.idProducto = p.idProducto");
+         ResultSet rs = pstmt.executeQuery()) {
+
+        while (rs.next()) {
+            DetalleVenta detalleVenta = new DetalleVenta();
+            detalleVenta.setIdDetalleVenta(rs.getInt("idDetalleVenta"));
+            detalleVenta.setVenta(rs.getInt("idVenta"));
+
+            Producto producto = new Producto();
+            producto.setIdProducto(rs.getInt("idProducto"));
+            producto.setNombre(rs.getString("Nombre"));
+            detalleVenta.setProducto(producto);
+
+            detalleVenta.setCantidad(rs.getInt("cantidad"));
+
+            detallesVenta.add(detalleVenta);
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace(); // Handle the SQLException appropriately, e.g., log the error or throw a custom exception.
+        // Return an empty list in case of exception
+        
+    }
+
+    // Move the return statement outside the try block
+    return detallesVenta;
+}
+public void eliminarDetalleVentas(HttpServletRequest request) {
+     int idDetalleVenta= Integer.parseInt(request.getParameter("idDetalleVenta"));
+    try (Connection connection = Conexion.obtenerConexion();
+         PreparedStatement pstmt = connection.prepareStatement("DELETE FROM DetalleVentas WHERE idDetalleVenta = ?")) {
+
+        pstmt.setInt(1, idDetalleVenta);
+
+        int rowsAffected = pstmt.executeUpdate();
+
+        if (rowsAffected > 0) {
+            System.out.println("DetalleVenta with ID " + idDetalleVenta + " deleted successfully.");
+        } else {
+            System.out.println("No DetalleVenta found with ID " + idDetalleVenta + ". No changes were made.");
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace(); // Handle the SQLException appropriately, e.g., log the error or throw a custom exception.
+    }
+}
+ private void modificarDetalleVentas(HttpServletRequest request) {
+     int idDetalleVenta = Integer.parseInt(request.getParameter("idDetalleVenta"));
+        int newVenta = Integer.parseInt(request.getParameter("venta"));
+        int newProducto = Integer.parseInt(request.getParameter("idProducto"));
+        int newCantidad = Integer.parseInt(request.getParameter("cantidad"));
+        try (Connection connection = Conexion.obtenerConexion();
+             PreparedStatement pstmt = connection.prepareStatement(
+                     "UPDATE DetalleVentas SET idventa = ?, cantidad = ? , idProducto = ? WHERE idDetalleVenta = ?")) {
+
+            pstmt.setInt(1, newVenta);
+            pstmt.setInt(2, newCantidad);
+            pstmt.setInt(3, newProducto);
+            pstmt.setInt(4, idDetalleVenta);
+
+            int rowsAffected = pstmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("DetalleVenta with ID " + idDetalleVenta + " modified successfully.");
+            } else {
+                System.out.println("No DetalleVenta found with ID " + idDetalleVenta + ". No changes were made.");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace(); // Handle the SQLException appropriately, e.g., log the error or throw a custom exception.
+        }
+    }private void agregarDetalleVentas(HttpServletRequest request) {
+        
+       
+        int idProducto = Integer.parseInt(request.getParameter("idProducto"));
+        int venta = Integer.parseInt(request.getParameter("venta"));
+        int cantidad = Integer.parseInt(request.getParameter("cantidad"));
+        try (Connection connection = Conexion.obtenerConexion();
+             PreparedStatement pstmt = connection.prepareStatement(
+                     "INSERT INTO DetalleVentas (idProducto, idventa, cantidad) VALUES (?, ?, ?)")) {
+
+            pstmt.setInt(1, idProducto);
+            pstmt.setInt(2, venta);
+            pstmt.setInt(3, cantidad);
+
+            int rowsAffected = pstmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("DetalleVenta added successfully.");
+            } else {
+                System.out.println("Failed to add DetalleVenta.");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace(); // Handle the SQLException appropriately, e.g., log the error or throw a custom exception.
+        }
+    }
     public void obtenerEmpleados(HttpServletResponse response) throws IOException {
         ArrayList<Empleado> listaEmpleados = new ArrayList<>();
 
@@ -834,7 +1013,37 @@ public ArrayList<Proveedor> mostrarProveedores() {
 
     return listaProductos;
 }
+public void modificarDetallePedido(HttpServletRequest request) {
+    int idDetallePedido = Integer.parseInt(request.getParameter("idDetallePedido"));
+    int nuevaCantidad = Integer.parseInt(request.getParameter("cantidad"));
+    double nuevoPrecioUnitario = Double.parseDouble(request.getParameter("precioUnitario"));
 
+    try (Connection connection = Conexion.obtenerConexion();
+         PreparedStatement pstmt = connection.prepareStatement("UPDATE DetallePedidos SET cantidad = ?, precioUnitario = ? WHERE idDetallePedido = ?")) {
+
+        pstmt.setInt(1, nuevaCantidad);
+        pstmt.setDouble(2, nuevoPrecioUnitario);
+        pstmt.setInt(3, idDetallePedido);
+
+        pstmt.executeUpdate();
+    } catch (SQLException e) {
+        e.printStackTrace(); // Handle the exception appropriately, e.g., log the error or throw a custom exception.
+    }
+}
+
+public void eliminarDetallePedido(HttpServletRequest request) {
+    int idDetallePedido = Integer.parseInt(request.getParameter("idDetallePedido"));
+
+    try (Connection connection = Conexion.obtenerConexion();
+         PreparedStatement pstmt = connection.prepareStatement("DELETE FROM DetallePedidos WHERE idDetallePedido = ?")) {
+
+        pstmt.setInt(1, idDetallePedido);
+
+        pstmt.executeUpdate();
+    } catch (SQLException e) {
+        e.printStackTrace(); // Handle the exception appropriately, e.g., log the error or throw a custom exception.
+    }
+}
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
@@ -894,16 +1103,29 @@ public ArrayList<Proveedor> mostrarProveedores() {
                     request.setAttribute("pedidosList", mostrarPedidos());
                     request.getRequestDispatcher("/GestionarPedidos.jsp").forward(request, response);
                 }
+                 case "GestionarDetallePedidos" -> {
+                    request.setAttribute("pedidosList", mostrarDetallePedido());
+                    request.getRequestDispatcher("/GestionarDetallePedidos.jsp").forward(request, response);
+                }
                  case "GestionarVentas" -> {
                     request.setAttribute("ventasList", mostrarVentas());
-                     System.out.println("HHolaaa" + mostrarCompras());
-                     System.out.println("HHolaaa" + mostrarVentas());
+                    
                     request.getRequestDispatcher("/GestionarVentas.jsp").forward(request, response);
+                }
+                  case "GestionarDetalleVentas" -> {
+                    request.setAttribute("ventasDetalleList", mostrarDetallesVenta());
+                    
+                    request.getRequestDispatcher("/GestionarDetalleVentas.jsp").forward(request, response);
                 }
                  case "GestionarProveedores" -> {
                     request.setAttribute("proveedoresList", mostrarProveedores());
                     
                     request.getRequestDispatcher("/GestionarProveedores.jsp").forward(request, response);
+                }
+                 case "GestionarDetalleCompras" -> {
+                    request.setAttribute("comprasDetalleList", mostrarDetalleCompra(response));
+                    
+                    request.getRequestDispatcher("/GestionarDetalleCompras.jsp").forward(request, response);
                 }
                 case "AgregarCompra" -> {
 
@@ -1011,6 +1233,18 @@ public ArrayList<Proveedor> mostrarProveedores() {
                 eliminarProveedor(request);
                 response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarProveedores");
             }
+             case "AgregarDetalleVenta" -> {
+                 agregarDetalleVentas(request);
+                response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarDetalleVentas");
+            }
+             case "ModificarDetalleVenta" -> {
+             modificarDetalleVentas(request);
+                response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarDetalleVentas");
+            }
+             case "EliminarDetalleVenta" -> {
+                 eliminarDetalleVentas(request);
+                response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarDetalleVentas");
+            }
             case "ModificarCategoria" -> {
                 modificarCategoria(request, response);
                 response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarCategorias");
@@ -1029,6 +1263,18 @@ public ArrayList<Proveedor> mostrarProveedores() {
             } case "EliminarCompra" -> {
                 eliminarCompra(request, response);
                 response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarCompras");
+            }
+             case "AgregarDetallePedido" -> {
+                 agregarDetallePedido(request);
+                response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarDetallePedidos");
+            }
+             case "ModificarDetallePedido" -> {
+                 modificarDetallePedido(request);
+                response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarDetallePedidos");
+            }
+             case "EliminarDetallePedido" -> {
+                 eliminarDetallePedido(request);
+                response.sendRedirect(request.getContextPath() + "/ServletPrincipal?accion=GestionarDetallePedidos");
             }
             default -> {
                 request.getRequestDispatcher("/error404").forward(request, response);
